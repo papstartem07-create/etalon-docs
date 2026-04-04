@@ -538,8 +538,8 @@
         </form>
         <div id="authError" class="auth-error"></div>
         <div id="authLinks" style="margin-top:16px;font-size:13px;color:var(--text-muted)">
-            <span onclick="resetPassword()" style="cursor:pointer;color:var(--primary)">Забыли пароль?</span>
-            <span style="margin:0 8px">·</span>
+            <span onclick="showResetMode()" id="authForgot" style="cursor:pointer;color:var(--primary)">Забыли пароль?</span>
+            <span id="authLinkDot" style="margin:0 8px">·</span>
             <span onclick="toggleAuthMode()" id="authToggle" style="cursor:pointer;color:var(--primary)">Создать аккаунт</span>
         </div>
     </div>
@@ -658,34 +658,62 @@ function pl(n, o, f, m) {
 }
 
 /* ===== AUTH ===== */
-let isRegisterMode = false;
+let authMode = 'login'; // 'login' | 'register' | 'reset'
 
 function showAuthError(msg) {
     const el = document.getElementById('authError');
     el.textContent = msg; el.style.display = 'block';
 }
 
-function toggleAuthMode() {
-    isRegisterMode = !isRegisterMode;
+function setAuthMode(mode) {
+    authMode = mode;
     document.getElementById('authError').style.display = 'none';
-    if (isRegisterMode) {
-        document.getElementById('authSubtitle').textContent = 'Создайте аккаунт';
-        document.getElementById('authSubmitBtn').textContent = 'Зарегистрироваться';
-        document.getElementById('authToggle').textContent = 'Уже есть аккаунт? Войти';
-    } else {
-        document.getElementById('authSubtitle').textContent = 'Войдите в аккаунт';
-        document.getElementById('authSubmitBtn').textContent = 'Войти';
-        document.getElementById('authToggle').textContent = 'Создать аккаунт';
+    const pw = document.getElementById('authPassword');
+    const sub = document.getElementById('authSubtitle');
+    const btn = document.getElementById('authSubmitBtn');
+    const toggle = document.getElementById('authToggle');
+    const forgot = document.getElementById('authForgot');
+    const dot = document.getElementById('authLinkDot');
+
+    if (mode === 'login') {
+        sub.textContent = 'Войдите в аккаунт';
+        btn.textContent = 'Войти';
+        pw.style.display = 'block';
+        toggle.textContent = 'Создать аккаунт';
+        forgot.style.display = 'inline';
+        dot.style.display = 'inline';
+    } else if (mode === 'register') {
+        sub.textContent = 'Создайте аккаунт';
+        btn.textContent = 'Зарегистрироваться';
+        pw.style.display = 'block';
+        toggle.textContent = 'Уже есть аккаунт? Войти';
+        forgot.style.display = 'none';
+        dot.style.display = 'none';
+    } else if (mode === 'reset') {
+        sub.textContent = 'Введите email для сброса пароля';
+        btn.textContent = 'Отправить ссылку';
+        pw.style.display = 'none';
+        toggle.textContent = 'Вернуться ко входу';
+        forgot.style.display = 'none';
+        dot.style.display = 'none';
     }
 }
 
+function toggleAuthMode() {
+    if (authMode === 'register' || authMode === 'reset') setAuthMode('login');
+    else setAuthMode('register');
+}
+
+function showResetMode() { setAuthMode('reset'); }
+
 async function handleAuthSubmit() {
+    if (authMode === 'reset') { await resetPassword(); return; }
     const email = document.getElementById('authEmail').value.trim();
     const pw = document.getElementById('authPassword').value;
     if (!email || !pw) { showAuthError('Введите email и пароль'); return; }
-    if (isRegisterMode && pw.length < 6) { showAuthError('Пароль минимум 6 символов'); return; }
+    if (authMode === 'register' && pw.length < 6) { showAuthError('Пароль минимум 6 символов'); return; }
     try {
-        if (isRegisterMode) {
+        if (authMode === 'register') {
             await auth.createUserWithEmailAndPassword(email, pw);
         } else {
             await auth.signInWithEmailAndPassword(email, pw);
@@ -706,11 +734,12 @@ async function handleAuthSubmit() {
 
 async function resetPassword() {
     const email = document.getElementById('authEmail').value.trim();
-    if (!email) { showAuthError('Введите email для сброса пароля'); return; }
+    if (!email) { showAuthError('Введите email'); return; }
     try {
         await auth.sendPasswordResetEmail(email);
         document.getElementById('authError').style.display = 'none';
-        toast('Письмо для сброса пароля отправлено на ' + email);
+        toast('Ссылка для сброса отправлена на ' + email);
+        setAuthMode('login');
     } catch(e) {
         const msgs = {
             'auth/user-not-found': 'Пользователь с таким email не найден',
