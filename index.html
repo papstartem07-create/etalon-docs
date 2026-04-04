@@ -982,8 +982,6 @@ function openTaskModal(cid, tid) {
         <h3>${t ? 'Редактировать задачу' : 'Новая задача'}</h3>
         <div class="form-group"><label>Задача</label>
             <input type="text" id="fTitle" value="${t ? esc(t.title) : ''}" placeholder="Попросить подписать договор"></div>
-        <div class="form-group"><label>Описание</label>
-            <textarea id="fTDesc" placeholder="Подробности...">${t ? esc(t.description||'') : ''}</textarea></div>
         <div class="form-group"><label>Клиент</label>
             <select id="fClient"><option value="">— Без привязки —</option>${cOpts}</select></div>
         <div class="form-group"><label>Статус</label>
@@ -1006,7 +1004,7 @@ function openTaskModal(cid, tid) {
 function saveTask(tid) {
     const title = document.getElementById('fTitle').value.trim();
     if (!title) { toast('Введите название'); return; }
-    const desc = document.getElementById('fTDesc').value.trim();
+    const desc = '';
     const clientId = document.getElementById('fClient').value || null;
     const column = document.getElementById('fCol').value;
     const dueDate = document.getElementById('fDue').value || null;
