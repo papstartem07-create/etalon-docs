@@ -6,6 +6,9 @@
     <title>Документы — Эталон</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --primary: #4A9FD9;
@@ -527,12 +530,14 @@
     <div class="auth-card">
         <img src="logo.png" alt="Эталон">
         <h2>Документы</h2>
-        <p>Введите пароль для входа</p>
-        <form id="authForm" onsubmit="event.preventDefault();handleLogin()">
-        <input type="password" id="authPassword" placeholder="Пароль" autocomplete="current-password" name="password">
+        <p>Войдите или создайте аккаунт</p>
+        <form onsubmit="event.preventDefault();handleLogin()">
+            <input type="email" id="authEmail" placeholder="Email" autocomplete="email" style="margin-bottom:10px">
+            <input type="password" id="authPassword" placeholder="Пароль" autocomplete="current-password">
+            <button type="submit" class="auth-btn" style="margin-top:16px">Войти</button>
         </form>
-        <button class="auth-btn" onclick="handleLogin()">Войти</button>
-        <div id="authError" class="auth-error">Неверный пароль</div>
+        <button class="auth-btn" onclick="handleRegister()" style="margin-top:8px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary)">Создать аккаунт</button>
+        <div id="authError" class="auth-error"></div>
     </div>
 </div>
 
@@ -583,29 +588,54 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'etalon_docs_tracker';
-const DEFAULT_HASH = '50867b5fcc19376ca48c46e35b3e353009a70baacde1e7fe9fe848e98d2644a2';
+/* ===== FIREBASE INIT ===== */
+firebase.initializeApp({
+    apiKey: "AIzaSyA9YoT7_jTwJLCnfXddkfJsYYN1ahr6zZ8",
+    authDomain: "etalon-docs.firebaseapp.com",
+    projectId: "etalon-docs",
+    storageBucket: "etalon-docs.firebasestorage.app",
+    messagingSenderId: "380746796562",
+    appId: "1:380746796562:web:78c8092ced0e51e1c792cb"
+});
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+let unsubFirestore = null;
 
 function genId(p) { return p + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
-function getDefault() { return { version: 1, passwordHash: DEFAULT_HASH, clients: [], tasks: [] }; }
+function getDefault() { return { version: 1, clients: [], tasks: [] }; }
 
-function load() {
+let data = getDefault();
+let saving = false;
+
+async function save() {
+    if (!currentUser || saving) return;
+    saving = true;
     try {
-        const r = localStorage.getItem(STORAGE_KEY);
-        if (!r) return getDefault();
-        const d = JSON.parse(r);
-        if (!d.clients) d.clients = [];
-        if (!d.tasks) d.tasks = [];
-        return d;
-    } catch { return getDefault(); }
+        await db.collection('users').doc(currentUser.uid).set({
+            clients: data.clients,
+            tasks: data.tasks,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch(e) { console.error('Save error:', e); toast('Ошибка сохранения'); }
+    saving = false;
 }
-function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-let data = load();
 
-async function hashPw(s) {
-    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-    return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2,'0')).join('');
+async function loadFromFirestore() {
+    if (!currentUser) return;
+    try {
+        const doc = await db.collection('users').doc(currentUser.uid).get();
+        if (doc.exists) {
+            const d = doc.data();
+            data.clients = d.clients || [];
+            data.tasks = d.tasks || [];
+        } else {
+            data = getDefault();
+            await save();
+        }
+    } catch(e) { console.error('Load error:', e); toast('Ошибка загрузки'); }
 }
+
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 function fmtDate(iso) {
     if (!iso) return '';
@@ -624,19 +654,70 @@ function pl(n, o, f, m) {
 }
 
 /* ===== AUTH ===== */
-async function handleLogin() {
-    const h = await hashPw(document.getElementById('authPassword').value);
-    if (h === data.passwordHash) { localStorage.setItem('etalon_auth','1'); showApp(); }
-    else document.getElementById('authError').style.display = 'block';
+function showAuthError(msg) {
+    const el = document.getElementById('authError');
+    el.textContent = msg; el.style.display = 'block';
 }
-document.getElementById('authPassword').addEventListener('keydown', e => { if (e.key==='Enter') handleLogin(); });
-function logout() { localStorage.removeItem('etalon_auth'); location.reload(); }
-function showApp() {
+
+async function handleLogin() {
+    const email = document.getElementById('authEmail').value.trim();
+    const pw = document.getElementById('authPassword').value;
+    if (!email || !pw) { showAuthError('Введите email и пароль'); return; }
+    try {
+        await auth.signInWithEmailAndPassword(email, pw);
+    } catch(e) {
+        const msgs = {
+            'auth/user-not-found': 'Пользователь не найден',
+            'auth/wrong-password': 'Неверный пароль',
+            'auth/invalid-email': 'Неверный email',
+            'auth/invalid-credential': 'Неверный email или пароль',
+            'auth/too-many-requests': 'Слишком много попыток, попробуйте позже'
+        };
+        showAuthError(msgs[e.code] || e.message);
+    }
+}
+
+async function handleRegister() {
+    const email = document.getElementById('authEmail').value.trim();
+    const pw = document.getElementById('authPassword').value;
+    if (!email || !pw) { showAuthError('Введите email и пароль'); return; }
+    if (pw.length < 6) { showAuthError('Пароль минимум 6 символов'); return; }
+    try {
+        await auth.createUserWithEmailAndPassword(email, pw);
+    } catch(e) {
+        const msgs = {
+            'auth/email-already-in-use': 'Этот email уже зарегистрирован',
+            'auth/invalid-email': 'Неверный email',
+            'auth/weak-password': 'Пароль слишком простой (мин. 6 символов)'
+        };
+        showAuthError(msgs[e.code] || e.message);
+    }
+}
+
+function logout() { auth.signOut(); }
+
+async function showApp() {
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    await loadFromFirestore();
     render();
 }
-function checkAuth() { if (localStorage.getItem('etalon_auth')==='1') showApp(); }
+
+function showAuth() {
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('authError').style.display = 'none';
+}
+
+auth.onAuthStateChanged(async (user) => {
+    currentUser = user;
+    if (user) {
+        await showApp();
+    } else {
+        data = getDefault();
+        showAuth();
+    }
+});
 
 /* ===== STATE ===== */
 const expanded = new Set();
@@ -1058,7 +1139,8 @@ document.addEventListener('click', e => {
 
 /* ===== EXPORT/IMPORT ===== */
 function exportData() {
-    const b = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+    const exp = { clients: data.clients, tasks: data.tasks };
+    const b = new Blob([JSON.stringify(exp, null, 2)], { type:'application/json' });
     const u = URL.createObjectURL(b);
     const a = document.createElement('a'); a.href = u;
     a.download = `etalon_docs_${new Date().toISOString().slice(0,10)}.json`;
@@ -1073,8 +1155,9 @@ function importData(ev) {
                 const imp = JSON.parse(e.target.result);
                 if (!imp.clients || !Array.isArray(imp.clients)) { toast('Неверный формат'); return; }
                 if (!imp.tasks) imp.tasks = [];
-                if (!imp.passwordHash) imp.passwordHash = data.passwordHash;
-                data = imp; save(); render(); toast('Данные импортированы');
+                data.clients = imp.clients;
+                data.tasks = imp.tasks;
+                save(); render(); toast('Данные импортированы');
             } catch { toast('Ошибка чтения файла'); }
         };
         r.readAsText(f);
@@ -1099,7 +1182,7 @@ function showConfirm(msg, onYes) {
 function closeConfirm() { document.getElementById('confirmOverlay').classList.remove('open'); }
 
 /* ===== INIT ===== */
-checkAuth();
+// Auth handled by firebase.auth().onAuthStateChanged above
 </script>
 </body>
 </html>
