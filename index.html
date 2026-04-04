@@ -283,7 +283,8 @@
             border-radius: 50%; font-size: 13px; color: var(--text-muted);
             display: flex; align-items: center; justify-content: center; transition: all 0.2s;
         }
-        .small-btn:hover { background: var(--red-bg); color: var(--red); }
+        .small-btn:hover { background: var(--primary-light); color: var(--primary); transform: scale(1.15); }
+        .small-btn.del:hover { background: var(--red-bg); color: var(--red); }
 
         /* ===== TASKS ===== */
         .task-list { display: flex; flex-direction: column; gap: 8px; }
@@ -818,7 +819,7 @@ function renderDocRow(cid, doc, isArch) {
     const dt = doc.createdAt ? fmtDate(doc.createdAt) : '';
     const acts = !isArch ? `<div class="doc-actions">
         <button class="small-btn" onclick="event.stopPropagation();openDocModal('${cid}','${doc.id}')" title="Редактировать">&#9998;</button>
-        <button class="small-btn" onclick="event.stopPropagation();deleteDoc('${cid}','${doc.id}')" title="Удалить">&times;</button>
+        <button class="small-btn" onclick="event.stopPropagation();deleteDoc('${cid}','${doc.id}')" title="Удалить" class="del">&times;</button>
     </div>` : '';
     return `<div class="doc-row">
         <span class="doc-type ${tc}">${tl}</span>
@@ -846,7 +847,7 @@ function renderTask(t) {
         <button class="task-status-btn task-status-${t.column}" onclick="cycleTaskStatus('${t.id}')" title="Нажмите чтобы сменить статус">${sl}</button>
         <div class="task-actions">
             <button class="small-btn" onclick="openTaskModal(null,'${t.id}')" title="Редактировать">&#9998;</button>
-            <button class="small-btn" onclick="deleteTask('${t.id}')" title="Удалить">&times;</button>
+            <button class="small-btn" onclick="deleteTask('${t.id}')" title="Удалить" class="del">&times;</button>
         </div>
     </div>`;
 }
