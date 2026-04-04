@@ -530,14 +530,18 @@
     <div class="auth-card">
         <img src="logo.png" alt="Эталон">
         <h2>Документы</h2>
-        <p>Войдите или создайте аккаунт</p>
-        <form onsubmit="event.preventDefault();handleLogin()">
+        <p id="authSubtitle">Войдите в аккаунт</p>
+        <form onsubmit="event.preventDefault();handleAuthSubmit()">
             <input type="email" id="authEmail" placeholder="Email" autocomplete="email" style="margin-bottom:10px">
             <input type="password" id="authPassword" placeholder="Пароль" autocomplete="current-password">
-            <button type="submit" class="auth-btn" style="margin-top:16px">Войти</button>
+            <button type="submit" class="auth-btn" id="authSubmitBtn" style="margin-top:16px">Войти</button>
         </form>
-        <button class="auth-btn" onclick="handleRegister()" style="margin-top:8px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary)">Создать аккаунт</button>
         <div id="authError" class="auth-error"></div>
+        <div id="authLinks" style="margin-top:16px;font-size:13px;color:var(--text-muted)">
+            <span onclick="resetPassword()" style="cursor:pointer;color:var(--primary)">Забыли пароль?</span>
+            <span style="margin:0 8px">·</span>
+            <span onclick="toggleAuthMode()" id="authToggle" style="cursor:pointer;color:var(--primary)">Создать аккаунт</span>
+        </div>
     </div>
 </div>
 
@@ -654,41 +658,63 @@ function pl(n, o, f, m) {
 }
 
 /* ===== AUTH ===== */
+let isRegisterMode = false;
+
 function showAuthError(msg) {
     const el = document.getElementById('authError');
     el.textContent = msg; el.style.display = 'block';
 }
 
-async function handleLogin() {
+function toggleAuthMode() {
+    isRegisterMode = !isRegisterMode;
+    document.getElementById('authError').style.display = 'none';
+    if (isRegisterMode) {
+        document.getElementById('authSubtitle').textContent = 'Создайте аккаунт';
+        document.getElementById('authSubmitBtn').textContent = 'Зарегистрироваться';
+        document.getElementById('authToggle').textContent = 'Уже есть аккаунт? Войти';
+    } else {
+        document.getElementById('authSubtitle').textContent = 'Войдите в аккаунт';
+        document.getElementById('authSubmitBtn').textContent = 'Войти';
+        document.getElementById('authToggle').textContent = 'Создать аккаунт';
+    }
+}
+
+async function handleAuthSubmit() {
     const email = document.getElementById('authEmail').value.trim();
     const pw = document.getElementById('authPassword').value;
     if (!email || !pw) { showAuthError('Введите email и пароль'); return; }
+    if (isRegisterMode && pw.length < 6) { showAuthError('Пароль минимум 6 символов'); return; }
     try {
-        await auth.signInWithEmailAndPassword(email, pw);
+        if (isRegisterMode) {
+            await auth.createUserWithEmailAndPassword(email, pw);
+        } else {
+            await auth.signInWithEmailAndPassword(email, pw);
+        }
     } catch(e) {
         const msgs = {
             'auth/user-not-found': 'Пользователь не найден',
             'auth/wrong-password': 'Неверный пароль',
             'auth/invalid-email': 'Неверный email',
             'auth/invalid-credential': 'Неверный email или пароль',
-            'auth/too-many-requests': 'Слишком много попыток, попробуйте позже'
+            'auth/too-many-requests': 'Слишком много попыток, попробуйте позже',
+            'auth/email-already-in-use': 'Этот email уже зарегистрирован',
+            'auth/weak-password': 'Пароль слишком простой (мин. 6 символов)'
         };
         showAuthError(msgs[e.code] || e.message);
     }
 }
 
-async function handleRegister() {
+async function resetPassword() {
     const email = document.getElementById('authEmail').value.trim();
-    const pw = document.getElementById('authPassword').value;
-    if (!email || !pw) { showAuthError('Введите email и пароль'); return; }
-    if (pw.length < 6) { showAuthError('Пароль минимум 6 символов'); return; }
+    if (!email) { showAuthError('Введите email для сброса пароля'); return; }
     try {
-        await auth.createUserWithEmailAndPassword(email, pw);
+        await auth.sendPasswordResetEmail(email);
+        document.getElementById('authError').style.display = 'none';
+        toast('Письмо для сброса пароля отправлено на ' + email);
     } catch(e) {
         const msgs = {
-            'auth/email-already-in-use': 'Этот email уже зарегистрирован',
-            'auth/invalid-email': 'Неверный email',
-            'auth/weak-password': 'Пароль слишком простой (мин. 6 символов)'
+            'auth/user-not-found': 'Пользователь с таким email не найден',
+            'auth/invalid-email': 'Неверный email'
         };
         showAuthError(msgs[e.code] || e.message);
     }
