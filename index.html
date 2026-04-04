@@ -847,15 +847,17 @@ function renderTask(t) {
 function openClientModal(editId) {
     const c = editId ? data.clients.find(x => x.id === editId) : null;
     document.getElementById('modalContent').innerHTML = `
+        <form onsubmit="event.preventDefault();saveClient('${editId||''}')">
         <h3>${c ? 'Редактировать клиента' : 'Новый клиент'}</h3>
         <div class="form-group"><label>Название компании</label>
             <input type="text" id="fName" value="${c ? esc(c.name) : ''}" placeholder="ООО Компания"></div>
         <div class="form-group"><label>Заметки</label>
             <textarea id="fNotes" placeholder="Контакт, телефон...">${c ? esc(c.notes||'') : ''}</textarea></div>
         <div class="modal-actions">
-            <button class="btn-ghost" onclick="closeModal()">Отмена</button>
-            <button class="btn-primary" onclick="saveClient('${editId||''}')">${c ? 'Сохранить' : 'Добавить'}</button>
-        </div>`;
+            <button type="button" class="btn-ghost" onclick="closeModal()">Отмена</button>
+            <button type="submit" class="btn-primary">${c ? 'Сохранить' : 'Добавить'}</button>
+        </div>
+        </form>`;
     openModal();
     setTimeout(() => document.getElementById('fName').focus(), 100);
 }
@@ -899,6 +901,7 @@ function openDocModal(cid, did) {
         return `<option value="${d.id}" ${doc?.parentId===d.id?'selected':''}>[${tl}] ${esc(d.description)}</option>`;
     }).join('');
     document.getElementById('modalContent').innerHTML = `
+        <form onsubmit="event.preventDefault();saveDoc('${cid}','${did||''}')">
         <h3>${doc ? 'Редактировать документ' : 'Новый документ'}</h3>
         <div class="form-group"><label>Тип</label>
             <select id="fType" onchange="docTypeChanged()">
@@ -916,9 +919,10 @@ function openDocModal(cid, did) {
                 <option value="edo" ${doc?.storage==='edo'?'selected':''}>ЭДО</option>
             </select></div>
         <div class="modal-actions">
-            <button class="btn-ghost" onclick="closeModal()">Отмена</button>
-            <button class="btn-primary" onclick="saveDoc('${cid}','${did||''}')">${doc ? 'Сохранить' : 'Добавить'}</button>
-        </div>`;
+            <button type="button" class="btn-ghost" onclick="closeModal()">Отмена</button>
+            <button type="submit" class="btn-primary">${doc ? 'Сохранить' : 'Добавить'}</button>
+        </div>
+        </form>`;
     openModal(); docTypeChanged();
     setTimeout(() => document.getElementById('fDesc').focus(), 100);
 }
@@ -974,6 +978,7 @@ function openTaskModal(cid, tid) {
     const clients = data.clients.filter(x => x.status === 'active');
     const cOpts = clients.map(c => `<option value="${c.id}" ${targetCid===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
     document.getElementById('modalContent').innerHTML = `
+        <form onsubmit="event.preventDefault();saveTask('${tid||''}')">
         <h3>${t ? 'Редактировать задачу' : 'Новая задача'}</h3>
         <div class="form-group"><label>Задача</label>
             <input type="text" id="fTitle" value="${t ? esc(t.title) : ''}" placeholder="Попросить подписать договор"></div>
@@ -990,9 +995,10 @@ function openTaskModal(cid, tid) {
         <div class="form-group"><label>Дедлайн</label>
             <input type="date" id="fDue" value="${t?.dueDate||''}" onclick="this.showPicker()"></div>
         <div class="modal-actions">
-            <button class="btn-ghost" onclick="closeModal()">Отмена</button>
-            <button class="btn-primary" onclick="saveTask('${tid||''}')">${t ? 'Сохранить' : 'Добавить'}</button>
-        </div>`;
+            <button type="button" class="btn-ghost" onclick="closeModal()">Отмена</button>
+            <button type="submit" class="btn-primary">${t ? 'Сохранить' : 'Добавить'}</button>
+        </div>
+        </form>`;
     openModal();
     setTimeout(() => document.getElementById('fTitle').focus(), 100);
 }
