@@ -132,13 +132,16 @@
         /* ===== CLIENT CARD ===== */
         .client-card {
             background: var(--card); border-radius: var(--radius); border: 1.5px solid var(--border);
-            margin-bottom: 16px; box-shadow: var(--shadow); transition: all 0.25s; overflow: hidden;
+            margin-bottom: 16px; box-shadow: var(--shadow); transition: all 0.25s; overflow: visible;
+            position: relative;
         }
         .client-card:hover { box-shadow: var(--shadow-md); border-color: var(--border-hover); }
         .client-header {
             display: flex; align-items: center; justify-content: space-between;
             padding: 18px 24px; cursor: pointer; user-select: none; transition: background 0.2s;
+            border-radius: var(--radius);
         }
+        .client-card.open .client-header { border-radius: var(--radius) var(--radius) 0 0; }
         .client-header:hover { background: var(--primary-light); }
         .client-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
         .client-expand {
@@ -177,7 +180,10 @@
         .dropdown button:hover { background: var(--primary-light); color: var(--primary); }
 
         /* ===== CLIENT BODY ===== */
-        .client-body { display: none; border-top: 1.5px solid var(--border); }
+        .client-body {
+            display: none; border-top: 1.5px solid var(--border);
+            border-radius: 0 0 var(--radius) var(--radius); overflow: hidden;
+        }
         .client-card.open .client-body { display: block; }
         .client-section { padding: 20px 24px; }
         .client-section + .client-section { border-top: 1px solid var(--border); }
@@ -452,28 +458,28 @@
             .section-add-btn { font-size: 12px; }
             .doc-group { margin-bottom: 8px; }
             .doc-card { border-radius: 8px; }
-            .doc-row {
-                flex-wrap: wrap; padding: 10px 12px; gap: 6px;
-            }
+            .doc-row { padding: 10px 12px; gap: 6px; }
             .doc-type { font-size: 9px; padding: 3px 6px; }
-            .doc-desc { font-size: 13px; min-width: 100px; }
+            .doc-desc { font-size: 13px; }
             .doc-date { display: none; }
-            .doc-status { width: auto; font-size: 11px; padding: 3px 8px; }
-            .doc-storage { width: auto; font-size: 11px; padding: 3px 8px; }
+            .doc-status { width: 110px; font-size: 11px; padding: 3px 8px; }
+            .doc-storage { width: 70px; font-size: 10px; padding: 3px 6px; }
+            .doc-storage svg { width: 14px; height: 14px; }
             .doc-actions { opacity: 1; }
-            .small-btn { width: 26px; height: 26px; }
+            .small-btn { width: 32px; height: 32px; font-size: 16px; }
             .doc-children .doc-row { padding-left: 28px; }
             .doc-children .doc-row::before { left: 16px; }
             .doc-child-wrap::before,
             .doc-child-wrap:not(:last-child)::after { left: 16px; }
 
             /* Tasks */
-            .task-item { padding: 8px 10px; gap: 6px; border-radius: 8px; }
-            .task-pin { width: 22px; height: 22px; font-size: 12px; }
+            .task-item { padding: 10px 12px; gap: 6px; border-radius: 8px; }
+            .task-pin { width: 28px; height: 28px; font-size: 14px; }
             .task-title { font-size: 13px; }
             .task-status-btn { font-size: 10px; padding: 3px 8px; }
             .task-due { font-size: 10px; }
             .task-actions { opacity: 1; }
+            .task-actions .small-btn { width: 32px; height: 32px; font-size: 16px; }
 
             /* Notes */
             .client-notes { padding: 10px 14px; font-size: 12px; }
