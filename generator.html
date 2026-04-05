@@ -1019,16 +1019,30 @@ function getVal(id) {
 }
 
 // ===== AUTO NUMBER =====
-async function loadNextNumber() {
-    try {
-        const resp = await fetch(API_URL + '/api/last-number');
-        const data = await resp.json();
-        const hint = document.getElementById('nextNumHint');
-        if (hint && data.next) {
-            hint.textContent = `(след.: ${data.next})`;
-            hint.dataset.next = data.next;
+function loadNextNumber() {
+    const history = JSON.parse(localStorage.getItem('doc_history') || '[]');
+    // Find max contract number from all generated contracts
+    let maxNum = 0;
+    history.forEach(item => {
+        if (item.type === 'contract' && item.contractNumber) {
+            const n = parseInt(item.contractNumber);
+            if (!isNaN(n) && n > maxNum) maxNum = n;
         }
-    } catch(e) { /* ignore */ }
+    });
+
+    const hint = document.getElementById('nextNumHint');
+    const input = document.getElementById('contractNumber');
+    if (maxNum > 0) {
+        const next = maxNum + 1;
+        if (hint) {
+            hint.textContent = `(след.: ${next})`;
+            hint.dataset.next = next;
+        }
+        // Auto-fill the field
+        if (input && !input.value) {
+            input.value = next;
+        }
+    }
 }
 
 function applyNextNum() {
@@ -1203,7 +1217,8 @@ async function generateDoc() {
             type: selectedType,
             url: result.url,
             clientName: body.clientName || '',
-            contractNumber: body.contractNumber || body.amendNumber || '',
+            contractNumber: body.contractNumber || '',
+            amendNumber: body.amendNumber || '',
             date: body.contractDate || body.amendDate || body.actDate || new Date().toISOString().slice(0,10),
         });
 
@@ -1255,7 +1270,8 @@ function renderHistory() {
         const dateStr = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         const label = typeLabels[item.type] || item.type;
         const icon = typeIcons[item.type] || 'file';
-        const title = item.contractNumber ? `${label} №${item.contractNumber}` : label;
+        const num = item.type === 'amendment' ? item.amendNumber : item.contractNumber;
+        const title = num ? `${label} №${num}` : label;
         return `<a href="${item.url}" target="_blank" class="history-item">
             <span class="history-item-icon"><i data-lucide="${icon}" style="width:20px;height:20px;stroke-width:1.5"></i></span>
             <div class="history-item-info">
