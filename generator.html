@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <!-- API-based: no jsPDF needed -->
     <style>
         :root {
@@ -433,6 +434,7 @@ firebase.initializeApp({
     appId: "1:380746796562:web:78c8092ced0e51e1c792cb"
 });
 const auth = firebase.auth();
+const db = firebase.firestore();
 
 async function login() {
     const email = document.getElementById('authEmail').value;
@@ -1020,30 +1022,28 @@ function getVal(id) {
 }
 
 // ===== AUTO NUMBER =====
-function loadNextNumber() {
-    const history = JSON.parse(localStorage.getItem('doc_history') || '[]');
-    // Find max contract number from all generated contracts
-    let maxNum = 0;
-    history.forEach(item => {
-        if (item.type === 'contract' && item.contractNumber) {
-            const n = parseInt(item.contractNumber);
+async function loadNextNumber() {
+    try {
+        const user = auth.currentUser;
+        if (!user) return;
+        const snap = await db.collection('users').doc(user.uid).collection('history')
+            .where('type', '==', 'contract')
+            .orderBy('createdAt', 'desc')
+            .limit(50)
+            .get();
+        let maxNum = 0;
+        snap.forEach(doc => {
+            const n = parseInt(doc.data().contractNumber);
             if (!isNaN(n) && n > maxNum) maxNum = n;
+        });
+        const hint = document.getElementById('nextNumHint');
+        const input = document.getElementById('contractNumber');
+        if (maxNum > 0) {
+            const next = maxNum + 1;
+            if (hint) { hint.textContent = `(след.: ${next})`; hint.dataset.next = next; }
+            if (input && !input.value) input.value = next;
         }
-    });
-
-    const hint = document.getElementById('nextNumHint');
-    const input = document.getElementById('contractNumber');
-    if (maxNum > 0) {
-        const next = maxNum + 1;
-        if (hint) {
-            hint.textContent = `(след.: ${next})`;
-            hint.dataset.next = next;
-        }
-        // Auto-fill the field
-        if (input && !input.value) {
-            input.value = next;
-        }
-    }
+    } catch(e) { console.error('loadNextNumber:', e); }
 }
 
 function applyNextNum() {
@@ -1233,14 +1233,15 @@ async function generateDoc() {
 }
 
 // ===== HISTORY =====
-function saveToHistory(item) {
-    const history = JSON.parse(localStorage.getItem('doc_history') || '[]');
-    history.unshift({
-        ...item,
-        createdAt: new Date().toISOString(),
-    });
-    if (history.length > 50) history.length = 50;
-    localStorage.setItem('doc_history', JSON.stringify(history));
+async function saveToHistory(item) {
+    try {
+        const user = auth.currentUser;
+        if (!user) return;
+        await db.collection('users').doc(user.uid).collection('history').add({
+            ...item,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+    } catch(e) { console.error('saveToHistory:', e); }
 }
 
 function toggleHistory() {
@@ -1257,31 +1258,48 @@ function toggleHistory() {
     }
 }
 
-function renderHistory() {
+async function renderHistory() {
     const list = document.getElementById('historyList');
-    const history = JSON.parse(localStorage.getItem('doc_history') || '[]');
-    if (!history.length) {
-        list.innerHTML = '<div class="history-empty"><p>Пока нет сгенерированных документов</p></div>';
+    const user = auth.currentUser;
+    if (!user) {
+        list.innerHTML = '<div class="history-empty"><p>Войдите для просмотра истории</p></div>';
         return;
     }
-    const typeLabels = { contract: 'Договор', amendment: 'Доп. соглашение', act: 'Итоговый акт' };
-    const typeIcons = { contract: 'file-text', amendment: 'file-pen', act: 'file-check' };
-    list.innerHTML = history.map(item => {
-        const date = new Date(item.createdAt);
-        const dateStr = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        const label = typeLabels[item.type] || item.type;
-        const icon = typeIcons[item.type] || 'file';
-        const num = item.type === 'amendment' ? item.amendNumber : item.contractNumber;
-        const title = num ? `${label} №${num}` : label;
-        return `<a href="${item.url}" target="_blank" class="history-item">
-            <span class="history-item-icon"><i data-lucide="${icon}" style="width:20px;height:20px;stroke-width:1.5"></i></span>
-            <div class="history-item-info">
-                <div class="history-item-title">${title}</div>
-                <div class="history-item-meta">${item.clientName || ''} · ${dateStr}</div>
-            </div>
-        </a>`;
-    }).join('');
-    lucide.createIcons();
+    list.innerHTML = '<div class="history-empty"><p>Загрузка...</p></div>';
+    try {
+        const snap = await db.collection('users').doc(user.uid).collection('history')
+            .orderBy('createdAt', 'desc')
+            .limit(50)
+            .get();
+        if (snap.empty) {
+            list.innerHTML = '<div class="history-empty"><p>Пока нет сгенерированных документов</p></div>';
+            return;
+        }
+        const typeLabels = { contract: 'Договор', amendment: 'Доп. соглашение', act: 'Итоговый акт' };
+        const typeIcons = { contract: 'file-text', amendment: 'file-pen', act: 'file-check' };
+        let html = '';
+        snap.forEach(doc => {
+            const item = doc.data();
+            const date = item.createdAt ? item.createdAt.toDate() : new Date();
+            const dateStr = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const label = typeLabels[item.type] || item.type;
+            const icon = typeIcons[item.type] || 'file';
+            const num = item.type === 'amendment' ? item.amendNumber : item.contractNumber;
+            const title = num ? `${label} №${num}` : label;
+            html += `<a href="${item.url}" target="_blank" class="history-item">
+                <span class="history-item-icon"><i data-lucide="${icon}" style="width:20px;height:20px;stroke-width:1.5"></i></span>
+                <div class="history-item-info">
+                    <div class="history-item-title">${title}</div>
+                    <div class="history-item-meta">${item.clientName || ''} · ${dateStr}</div>
+                </div>
+            </a>`;
+        });
+        list.innerHTML = html;
+        lucide.createIcons();
+    } catch(e) {
+        console.error('renderHistory:', e);
+        list.innerHTML = '<div class="history-empty"><p>Ошибка загрузки истории</p></div>';
+    }
 }
 
 // Initialize Lucide icons on page load
