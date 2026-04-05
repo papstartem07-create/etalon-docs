@@ -68,10 +68,11 @@
         .auth-card input:focus { border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 3px var(--primary-light); }
         .auth-btn {
             width: 100%; margin-top: 20px; padding: 14px; background: var(--primary);
-            color: white; border: none; border-radius: var(--radius-sm); font-size: 15px;
-            font-weight: 600; cursor: pointer; transition: all 0.2s;
+            color: white; border: none; border-radius: 999px; font-size: 15px;
+            font-weight: 600; cursor: pointer; transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(74,144,217,0.25);
         }
-        .auth-btn:hover { background: var(--primary-dark); box-shadow: 0 4px 12px rgba(74,159,217,0.3); }
+        .auth-btn:hover { background: var(--primary-dark); box-shadow: 0 6px 20px rgba(74,144,217,0.35); transform: translateY(-2px); }
         .auth-error { color: var(--red); font-size: 13px; margin-top: 14px; display: none; }
 
         /* ===== HEADER ===== */
@@ -269,17 +270,65 @@
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .header { padding: 0 16px; }
-            .header-nav { margin-left: 16px; gap: 2px; }
-            .header-nav a { padding: 6px 12px; font-size: 12px; }
-            .container { padding: 20px 16px 80px; }
-            .type-selector { grid-template-columns: 1fr; }
-            .subtype-selector { grid-template-columns: 1fr; }
-            .basis-selector { grid-template-columns: 1fr; }
+            .header { padding: 0 12px; height: 52px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .header-logo { height: 24px; flex-shrink: 0; }
+            .header-nav { margin-left: 8px; gap: 2px; flex-shrink: 0; }
+            .header-nav a { padding: 6px 12px; font-size: 12px; white-space: nowrap; }
+            .header-actions { gap: 4px; flex-shrink: 0; }
+            .header-btn { padding: 6px 12px; font-size: 12px; }
+            .container { padding: 16px 12px 80px; }
+            .page-title { font-size: 20px; }
+            .page-subtitle { font-size: 13px; }
+            .type-selector { grid-template-columns: 1fr; gap: 8px; }
+            .type-card { padding: 16px; }
+            .subtype-selector { grid-template-columns: 1fr; gap: 8px; }
+            .basis-selector { grid-template-columns: 1fr; gap: 8px; }
+            .form-section { padding: 20px 16px; margin-bottom: 12px; }
             .form-row, .form-row-3 { grid-template-columns: 1fr; }
-            .tz-row { grid-template-columns: 1fr; }
+            .tz-row { grid-template-columns: 1fr; gap: 6px; }
             .tz-header { display: none; }
+            .tz-row input, .tz-row textarea { font-size: 14px; }
+            .generate-btn { padding: 16px 36px; font-size: 15px; width: 100%; justify-content: center; }
+            .result-link-btn { padding: 14px 32px; font-size: 14px; }
+            .auth-card { padding: 40px 24px; margin: 0 16px; }
         }
+
+        /* ===== HISTORY ===== */
+        .history-panel {
+            position: fixed; top: 0; right: -400px; width: 380px; max-width: 90vw; height: 100vh;
+            background: var(--white); box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+            z-index: 200; transition: right 0.3s ease; overflow-y: auto;
+            display: flex; flex-direction: column;
+        }
+        .history-panel.open { right: 0; }
+        .history-header {
+            padding: 20px 24px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; background: var(--white); z-index: 1;
+        }
+        .history-header h3 { font-size: 16px; font-weight: 600; }
+        .history-close {
+            background: none; border: none; cursor: pointer; color: var(--text-muted);
+            padding: 4px; transition: color 0.2s;
+        }
+        .history-close:hover { color: var(--text); }
+        .history-list { padding: 12px; flex: 1; }
+        .history-item {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+            border-radius: 12px; margin-bottom: 6px; transition: background 0.15s;
+            text-decoration: none; color: var(--text);
+        }
+        .history-item:hover { background: var(--bg); }
+        .history-item-icon { color: var(--primary); flex-shrink: 0; }
+        .history-item-info { flex: 1; min-width: 0; }
+        .history-item-title { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .history-item-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .history-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px; }
+        .history-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.2); z-index: 199;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .history-overlay.open { opacity: 1; pointer-events: auto; }
 
         .hidden { display: none !important; }
     </style>
@@ -310,6 +359,7 @@
             <a href="generator.html" class="active">Генератор</a>
         </nav>
         <div class="header-actions">
+            <button class="header-btn" onclick="toggleHistory()" id="historyBtn"><i data-lucide="clock" style="width:14px;height:14px;stroke-width:2"></i></button>
             <button class="header-btn logout" onclick="logout()">Выйти</button>
         </div>
     </div>
@@ -357,6 +407,16 @@
             <a href="#" id="resultLink" target="_blank" class="result-link-btn">Открыть в Google Docs</a>
         </div>
     </div>
+</div>
+
+<!-- HISTORY PANEL -->
+<div class="history-overlay" id="historyOverlay" onclick="toggleHistory()"></div>
+<div class="history-panel" id="historyPanel">
+    <div class="history-header">
+        <h3>История</h3>
+        <button class="history-close" onclick="toggleHistory()"><i data-lucide="x" style="width:20px;height:20px"></i></button>
+    </div>
+    <div class="history-list" id="historyList"></div>
 </div>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -1138,6 +1198,15 @@ async function generateDoc() {
         lucide.createIcons();
         toast('Документ создан!');
 
+        // Save to history
+        saveToHistory({
+            type: selectedType,
+            url: result.url,
+            clientName: body.clientName || '',
+            contractNumber: body.contractNumber || body.amendNumber || '',
+            date: body.contractDate || body.amendDate || body.actDate || new Date().toISOString().slice(0,10),
+        });
+
     } catch(e) {
         console.error(e);
         toast('Ошибка: ' + e.message);
@@ -1145,6 +1214,57 @@ async function generateDoc() {
         btn.disabled = false;
         spinner.style.display = 'none';
     }
+}
+
+// ===== HISTORY =====
+function saveToHistory(item) {
+    const history = JSON.parse(localStorage.getItem('doc_history') || '[]');
+    history.unshift({
+        ...item,
+        createdAt: new Date().toISOString(),
+    });
+    if (history.length > 50) history.length = 50;
+    localStorage.setItem('doc_history', JSON.stringify(history));
+}
+
+function toggleHistory() {
+    const panel = document.getElementById('historyPanel');
+    const overlay = document.getElementById('historyOverlay');
+    const isOpen = panel.classList.contains('open');
+    if (isOpen) {
+        panel.classList.remove('open');
+        overlay.classList.remove('open');
+    } else {
+        renderHistory();
+        panel.classList.add('open');
+        overlay.classList.add('open');
+    }
+}
+
+function renderHistory() {
+    const list = document.getElementById('historyList');
+    const history = JSON.parse(localStorage.getItem('doc_history') || '[]');
+    if (!history.length) {
+        list.innerHTML = '<div class="history-empty"><p>Пока нет сгенерированных документов</p></div>';
+        return;
+    }
+    const typeLabels = { contract: 'Договор', amendment: 'Доп. соглашение', act: 'Итоговый акт' };
+    const typeIcons = { contract: 'file-text', amendment: 'file-pen', act: 'file-check' };
+    list.innerHTML = history.map(item => {
+        const date = new Date(item.createdAt);
+        const dateStr = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const label = typeLabels[item.type] || item.type;
+        const icon = typeIcons[item.type] || 'file';
+        const title = item.contractNumber ? `${label} №${item.contractNumber}` : label;
+        return `<a href="${item.url}" target="_blank" class="history-item">
+            <span class="history-item-icon"><i data-lucide="${icon}" style="width:20px;height:20px;stroke-width:1.5"></i></span>
+            <div class="history-item-info">
+                <div class="history-item-title">${title}</div>
+                <div class="history-item-meta">${item.clientName || ''} · ${dateStr}</div>
+            </div>
+        </a>`;
+    }).join('');
+    lucide.createIcons();
 }
 
 // Initialize Lucide icons on page load
