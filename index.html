@@ -92,10 +92,11 @@
         .header-nav a.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(74,144,217,0.25); }
         .header-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
         .header-btn {
-            padding: 8px 16px; border-radius: 50px; border: 1.5px solid var(--border);
+            padding: 8px 16px; border-radius: 999px; border: 1.5px solid var(--border);
             background: var(--white); cursor: pointer; font-size: 13px; font-weight: 500;
             color: var(--text-2); transition: all 0.2s; display: flex; align-items: center; gap: 6px;
         }
+        .header-btn.icon-only { padding: 8px; width: 36px; height: 36px; justify-content: center; }
         .header-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); transform: translateY(-1px); }
         .header-btn.logout { color: var(--text-muted); }
         .header-btn.logout:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
@@ -426,7 +427,8 @@
             .header-nav { margin-left: 8px; gap: 2px; }
             .header-nav a { padding: 6px 12px; font-size: 12px; }
             .header-btn span { display: none; }
-            .header-btn { padding: 8px 10px; border-radius: 999px; }
+            .header-btn { padding: 8px; width: 36px; height: 36px; justify-content: center; border-radius: 999px; }
+            .header-btn.logout { width: auto; padding: 6px 14px; font-size: 12px; }
             .container { padding: 16px 12px 80px; }
             .summary-bar {
                 flex-direction: column; gap: 12px; align-items: stretch;
