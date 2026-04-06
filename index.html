@@ -315,22 +315,44 @@
             .client-name { font-size: 14px; max-width: 140px; }
             .badge { font-size: 9px; padding: 2px 6px; }
             .menu-btn { width: 30px; height: 30px; }
-            .client-section { padding: 12px 14px; }
+            .client-section { padding: 12px 10px; }
             .section-title { font-size: 10px; }
             .section-add-btn { font-size: 12px; }
-            .doc-row { padding: 10px 12px; gap: 6px; }
+
+            /* Documents: stack layout for mobile */
+            .doc-row {
+                padding: 10px 10px; gap: 6px;
+                flex-wrap: wrap;
+            }
+            .doc-type-icon { width: 18px; height: 18px; }
             .doc-type { font-size: 9px; padding: 3px 6px; }
-            .doc-desc { font-size: 13px; }
+            .doc-desc {
+                font-size: 13px;
+                white-space: normal;
+                overflow: visible;
+                text-overflow: unset;
+                flex-basis: 100%;
+                order: 10;
+                margin-top: 2px;
+                word-break: break-word;
+                line-height: 1.4;
+            }
             .doc-date { display: none; }
-            .doc-status { width: 110px; font-size: 11px; padding: 3px 8px; }
-            .doc-storage { width: 70px; font-size: 10px; padding: 3px 6px; }
+            .doc-status { width: auto; font-size: 10px; padding: 3px 8px; }
+            .doc-storage { width: auto; font-size: 10px; padding: 3px 6px; }
             .doc-storage svg { width: 14px; height: 14px; }
             .doc-actions { opacity: 1; }
             .small-btn { width: 32px; height: 32px; font-size: 16px; }
-            .doc-children .doc-row { padding-left: 28px; }
-            .doc-children .doc-row::before { left: 16px; }
+            .doc-children .doc-row { padding-left: 24px; }
+            .doc-children .doc-row::before { left: 14px; }
             .doc-child-wrap::before,
-            .doc-child-wrap:not(:last-child)::after { left: 16px; }
+            .doc-child-wrap:not(:last-child)::after { left: 14px; }
+            .doc-children .doc-children .doc-row { padding-left: 38px; }
+            .doc-children .doc-children .doc-row::before { left: 28px; }
+            .doc-children .doc-children .doc-child-wrap::before,
+            .doc-children .doc-children .doc-child-wrap::after { left: 28px; }
+
+            /* Tasks */
             .task-item { padding: 10px 12px; gap: 6px; border-radius: 8px; }
             .task-pin { width: 28px; height: 28px; }
             .task-title { font-size: 13px; }
