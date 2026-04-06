@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Генератор документов — Эталон</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
@@ -355,13 +356,15 @@ async function login() {
 }
 function logout() { auth.signOut(); }
 
-auth.onAuthStateChanged(user => {
+auth.onAuthStateChanged(async user => {
     if (user) {
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('appScreen').style.display = 'block';
+        await loadSavedClients();
     } else {
         document.getElementById('authScreen').style.display = 'flex';
         document.getElementById('appScreen').style.display = 'none';
+        savedClients = [];
     }
 });
 
@@ -374,6 +377,8 @@ let selectedBasis = null;
 let attachedFiles = [];
 let tzRows = [{ desc: '', days: '', cost: '' }];
 let selectedClientType = 'ip';
+let savedClients = [];
+let selectedSavedClient = null;
 
 // ===== CONTRACTOR (always the same) =====
 const CONTRACTOR = {
@@ -394,6 +399,7 @@ function selectType(type) {
     selectedType = type;
     selectedSubtype = null;
     selectedBasis = null;
+    selectedSavedClient = null;
     attachedFiles = [];
     tzRows = [{ desc: '', days: '', cost: '' }];
 
@@ -444,7 +450,7 @@ function renderContractForm() {
         <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-blue"><i data-lucide="clipboard-list"></i></span></span> Данные договора</div>
         <div class="form-row">
             <div class="form-group">
-                <label>Номер договора <span class="required">*</span> <span id="nextNumHint" style="font-weight:400;color:var(--primary);font-size:12px;cursor:pointer" onclick="applyNextNum()"></span></label>
+                <label>Номер договора <span id="nextNumHint" style="font-weight:400;color:var(--primary);font-size:12px;cursor:pointer" onclick="applyNextNum()"></span></label>
                 <input type="text" id="contractNumber" placeholder="59">
             </div>
             <div class="form-group">
@@ -517,7 +523,7 @@ function renderAmendmentForm() {
         <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-orange"><i data-lucide="clipboard-list"></i></span></span> Данные доп. соглашения</div>
         <div class="form-row">
             <div class="form-group">
-                <label>Номер ДС <span class="required">*</span></label>
+                <label>Номер ДС</label>
                 <input type="text" id="amendNumber" placeholder="1">
             </div>
             <div class="form-group">
@@ -527,7 +533,7 @@ function renderAmendmentForm() {
         </div>
         <div class="form-row">
             <div class="form-group">
-                <label>Номер договора <span class="required">*</span></label>
+                <label>Номер договора</label>
                 <input type="text" id="amendContractNumber" placeholder="59">
             </div>
             <div class="form-group">
@@ -623,7 +629,7 @@ function renderActForm() {
         <!-- Basis: Contract -->
         <div id="basisContract" class="${selectedBasis==='contract'?'':'hidden'}">
             <div class="form-row">
-                <div class="form-group"><label>Номер договора <span class="required">*</span></label><input type="text" id="actContractNumber" placeholder="59"></div>
+                <div class="form-group"><label>Номер договора</label><input type="text" id="actContractNumber" placeholder="59"></div>
                 <div class="form-group"><label>Дата договора <span class="required">*</span></label><input type="date" id="actContractDate"></div>
             </div>
         </div>
@@ -635,7 +641,7 @@ function renderActForm() {
                 <div class="form-group"><label>Дата ДС <span class="required">*</span></label><input type="date" id="actAmendDate"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Номер договора <span class="required">*</span></label><input type="text" id="actAmendContractNumber" placeholder="59"></div>
+                <div class="form-group"><label>Номер договора</label><input type="text" id="actAmendContractNumber" placeholder="59"></div>
                 <div class="form-group"><label>Дата договора <span class="required">*</span></label><input type="date" id="actAmendContractDate"></div>
             </div>
         </div>
@@ -647,7 +653,7 @@ function renderActForm() {
                 <div class="form-group"><label>Дата промежуточного акта <span class="required">*</span></label><input type="date" id="actIntDate"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Номер договора <span class="required">*</span></label><input type="text" id="actIntContractNumber" placeholder="59"></div>
+                <div class="form-group"><label>Номер договора</label><input type="text" id="actIntContractNumber" placeholder="59"></div>
                 <div class="form-group"><label>Дата договора <span class="required">*</span></label><input type="date" id="actIntContractDate"></div>
             </div>
         </div>
@@ -707,9 +713,27 @@ function esc(s) { const d = document.createElement('div'); d.textContent = s; re
 
 function renderClientFields() {
     const isOoo = selectedClientType === 'ooo';
+    const clientOpts = savedClients.map(c =>
+        `<option value="${c.id}" ${selectedSavedClient===c.id?'selected':''}>${esc(c.name)}</option>`
+    ).join('');
     return `
     <div class="form-section">
         <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-red"><i data-lucide="building-2"></i></span></span> Реквизиты заказчика</div>
+
+        ${savedClients.length > 0 ? `
+        <div class="form-group" style="margin-bottom:20px">
+            <label><i data-lucide="bookmark" style="width:13px;height:13px;stroke-width:2;vertical-align:-2px;margin-right:4px"></i> Выбрать сохранённого клиента</label>
+            <div style="display:flex;gap:8px;align-items:center">
+                <select id="savedClientSelect" onchange="applySavedClient(this.value)" style="flex:1">
+                    <option value="">— Заполнить вручную —</option>
+                    ${clientOpts}
+                </select>
+                ${selectedSavedClient ? `<button class="btn-ghost" onclick="deleteSavedClient('${selectedSavedClient}')" title="Удалить клиента" style="padding:8px;flex-shrink:0;color:var(--red)"><i data-lucide="trash-2" style="width:16px;height:16px;stroke-width:2"></i></button>` : ''}
+            </div>
+        </div>
+        <div style="height:1px;background:var(--border);margin-bottom:20px"></div>
+        ` : ''}
+
         <div class="form-group">
             <label>Тип заказчика</label>
             <select id="clientType" onchange="selectedClientType=this.value;toggleClientFields()">
@@ -726,8 +750,9 @@ function renderClientFields() {
             <label>ФИО директора <span class="required">*</span></label>
             <input type="text" id="clientDirector" placeholder="Иванов Иван Иванович">
         </div>
-        <div class="form-row">
+        <div class="form-row-3">
             <div class="form-group"><label>ИНН <span class="required">*</span></label><input type="text" id="clientInn" placeholder="246300000000"></div>
+            <div class="form-group"><label>КПП</label><input type="text" id="clientKpp" placeholder="246301001"></div>
             <div class="form-group"><label id="clientOgrnLabel">${isOoo ? 'ОГРН' : 'ОГРНИП / ОГРН'}</label><input type="text" id="clientOgrn" placeholder="${isOoo ? '1022400000000' : '3252468...'}"></div>
         </div>
         <div class="form-group"><label>Юридический адрес</label><input type="text" id="clientAddress" placeholder="г. Красноярск, ул. ..."></div>
@@ -744,8 +769,119 @@ function renderClientFields() {
             <div class="form-group"><label>БИК</label><input type="text" id="clientBik" placeholder="040407..."></div>
             <div class="form-group"><label>Корр/счёт</label><input type="text" id="clientCorr" placeholder="30101..."></div>
         </div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px">
+            <button class="btn-ghost" onclick="saveCurrentClient()" style="display:flex;align-items:center;gap:6px;font-size:13px">
+                <i data-lucide="${selectedSavedClient ? 'save' : 'bookmark-plus'}" style="width:14px;height:14px;stroke-width:2"></i>
+                ${selectedSavedClient ? 'Обновить клиента' : 'Сохранить клиента'}
+            </button>
+        </div>
     </div>`;
 }
+// ===== SAVED CLIENTS =====
+async function loadSavedClients() {
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+        const snap = await db.collection('users').doc(user.uid).collection('savedClients')
+            .orderBy('name').get();
+        savedClients = [];
+        snap.forEach(doc => savedClients.push({ id: doc.id, ...doc.data() }));
+    } catch(e) { console.error('loadSavedClients:', e); }
+}
+
+async function saveCurrentClient() {
+    const user = auth.currentUser;
+    if (!user) return;
+    const clientData = getClientFieldsData();
+    if (!clientData.name) { toast('Заполните имя/название клиента'); return; }
+
+    try {
+        // Check if updating existing
+        if (selectedSavedClient) {
+            await db.collection('users').doc(user.uid).collection('savedClients')
+                .doc(selectedSavedClient).update(clientData);
+            toast('Клиент обновлён');
+        } else {
+            await db.collection('users').doc(user.uid).collection('savedClients')
+                .add(clientData);
+            toast('Клиент сохранён');
+        }
+        await loadSavedClients();
+        // Re-render to update dropdown
+        const state = saveFormState();
+        renderForm();
+        restoreFormState(state);
+    } catch(e) { console.error('saveClient:', e); toast('Ошибка сохранения'); }
+}
+
+async function deleteSavedClient(clientId) {
+    const user = auth.currentUser;
+    if (!user || !clientId) return;
+    if (!confirm('Удалить сохранённого клиента?')) return;
+    try {
+        await db.collection('users').doc(user.uid).collection('savedClients').doc(clientId).delete();
+        toast('Клиент удалён');
+        selectedSavedClient = null;
+        await loadSavedClients();
+        const state = saveFormState();
+        renderForm();
+        restoreFormState(state);
+    } catch(e) { console.error('deleteSavedClient:', e); toast('Ошибка удаления'); }
+}
+
+function getClientFieldsData() {
+    return {
+        clientType: getVal('clientType') || 'ip',
+        name: getVal('clientName'),
+        director: getVal('clientDirector'),
+        inn: getVal('clientInn'),
+        kpp: getVal('clientKpp'),
+        ogrn: getVal('clientOgrn'),
+        address: getVal('clientAddress'),
+        addressFact: getVal('clientAddressFact'),
+        phone: getVal('clientPhone'),
+        email: getVal('clientEmail'),
+        account: getVal('clientAccount'),
+        bank: getVal('clientBank'),
+        bik: getVal('clientBik'),
+        corr: getVal('clientCorr'),
+    };
+}
+
+function applySavedClient(clientId) {
+    selectedSavedClient = clientId || null;
+    if (!clientId) return;
+    const client = savedClients.find(c => c.id === clientId);
+    if (!client) return;
+
+    // Update type first
+    selectedClientType = client.clientType || 'ip';
+    const ct = document.getElementById('clientType');
+    if (ct) ct.value = selectedClientType;
+    toggleClientFields();
+
+    // Fill fields
+    const map = {
+        clientName: client.name,
+        clientDirector: client.director,
+        clientInn: client.inn,
+        clientKpp: client.kpp,
+        clientOgrn: client.ogrn,
+        clientAddress: client.address,
+        clientAddressFact: client.addressFact,
+        clientPhone: client.phone,
+        clientEmail: client.email,
+        clientAccount: client.account,
+        clientBank: client.bank,
+        clientBik: client.bik,
+        clientCorr: client.corr,
+    };
+    Object.entries(map).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val || '';
+    });
+}
+
 function formatSize(b) { return b < 1024 ? b + ' B' : b < 1048576 ? (b/1024).toFixed(1) + ' KB' : (b/1048576).toFixed(1) + ' MB'; }
 
 function toast(msg) {
@@ -908,15 +1044,15 @@ function validate() {
     const required = [];
     if (selectedType === 'contract') {
         if (!selectedSubtype) required.push('Тип услуги');
-        if (!getVal('contractNumber')) required.push('Номер договора');
+        // contractNumber is optional
         if (!getVal('contractDate')) required.push('Дата заключения');
         if (!getVal('clientName')) required.push(selectedClientType === 'ooo' ? 'Название компании' : 'ФИО');
         if (selectedClientType === 'ooo' && !getVal('clientDirector')) required.push('ФИО директора');
         if (!getVal('totalAmount')) required.push('Общая сумма');
     } else if (selectedType === 'amendment') {
-        if (!getVal('amendNumber')) required.push('Номер ДС');
+        // amendNumber is optional
         if (!getVal('amendDate')) required.push('Дата ДС');
-        if (!getVal('amendContractNumber')) required.push('Номер договора');
+        // amendContractNumber is optional
         if (!getVal('amendContractDate')) required.push('Дата договора');
         if (!getVal('amendSubject')) required.push('Суть ДС');
         if (!getVal('clientName')) required.push(selectedClientType === 'ooo' ? 'Название компании' : 'ФИО');
@@ -950,7 +1086,7 @@ async function generateDoc() {
                 subtype: selectedSubtype,
                 contractNumber: getVal('contractNumber'), contractDate: getVal('contractDate'),
                 clientType: getVal('clientType'), clientName: getVal('clientName'),
-                clientDirector: getVal('clientDirector'), clientInn: getVal('clientInn'),
+                clientDirector: getVal('clientDirector'), clientInn: getVal('clientInn'), clientKpp: getVal('clientKpp'),
                 clientOgrn: getVal('clientOgrn'), clientAddress: getVal('clientAddress'),
                 clientAddressFact: getVal('clientAddressFact'), clientPhone: getVal('clientPhone'),
                 clientEmail: getVal('clientEmail'), clientAccount: getVal('clientAccount'),
@@ -970,7 +1106,7 @@ async function generateDoc() {
                 isPayment: getVal('amendIsPayment') === 'yes',
                 finalAmount: parseInt(getVal('amendFinalAmount')) || 0,
                 clientType: getVal('clientType'), clientName: getVal('clientName'),
-                clientDirector: getVal('clientDirector'), clientInn: getVal('clientInn'),
+                clientDirector: getVal('clientDirector'), clientInn: getVal('clientInn'), clientKpp: getVal('clientKpp'),
                 clientOgrn: getVal('clientOgrn'), clientAddress: getVal('clientAddress'),
                 clientAddressFact: getVal('clientAddressFact'), clientPhone: getVal('clientPhone'),
                 clientEmail: getVal('clientEmail'), clientAccount: getVal('clientAccount'),
@@ -987,7 +1123,7 @@ async function generateDoc() {
                 amendNumber: getVal('actAmendNumber'), amendDate: getVal('actAmendDate'),
                 intNumber: getVal('actIntNumber'), intDate: getVal('actIntDate'),
                 clientType: getVal('clientType'), clientName: getVal('clientName'),
-                clientDirector: getVal('clientDirector'), clientInn: getVal('clientInn'),
+                clientDirector: getVal('clientDirector'), clientInn: getVal('clientInn'), clientKpp: getVal('clientKpp'),
                 clientOgrn: getVal('clientOgrn'), clientAddress: getVal('clientAddress'),
                 clientAddressFact: getVal('clientAddressFact'), clientPhone: getVal('clientPhone'),
                 clientEmail: getVal('clientEmail'), clientAccount: getVal('clientAccount'),
