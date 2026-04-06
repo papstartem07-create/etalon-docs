@@ -6,131 +6,54 @@
     <title>Генератор документов — Эталон</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <!-- API-based: no jsPDF needed -->
     <style>
-        :root {
-            --primary: #4A9FD9;
-            --primary-dark: #3A87BF;
-            --primary-light: #E6F0F8;
-            --primary-muted: #B3CBE0;
-            --accent: #B8C4DD;
-            --white: #FFFFFF;
-            --bg: #F8F9FC;
-            --card: #FFFFFF;
-            --border: #ECEEF4;
-            --border-hover: #D4D8E8;
-            --text: #1E1E2D;
-            --text-2: #3F4254;
-            --text-muted: #A1A5B7;
-            --green: #22AD5C;
-            --green-bg: #EEFBF3;
-            --red: #E44258;
-            --red-bg: #FEF0F2;
-            --yellow: #F5A623;
-            --yellow-bg: #FFF8EC;
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-            --shadow: 0 1px 4px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.02);
-            --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
-            --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
-            --radius: 16px;
-            --radius-sm: 10px;
-            --radius-xs: 6px;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Geologica', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(180deg, #F0F4F8 0%, var(--bg) 400px); color: var(--text);
-            min-height: 100vh; font-size: 14px; line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
+        /* ===== PAGE-SPECIFIC: Generator ===== */
 
-        /* ===== AUTH ===== */
-        .auth-screen {
-            display: flex; align-items: center; justify-content: center;
-            min-height: 100vh; background: var(--bg);
-        }
-        .auth-card {
-            background: var(--white); border-radius: 24px; padding: 56px 44px;
-            box-shadow: var(--shadow-lg); text-align: center; width: 100%; max-width: 400px;
-            border: 1px solid var(--border);
-        }
-        .auth-card img { height: 44px; margin-bottom: 32px; }
-        .auth-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-        .auth-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; }
-        .auth-card input {
-            width: 100%; padding: 14px 18px; border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm); font-size: 16px; outline: none;
-            transition: all 0.2s; background: var(--bg);
-        }
-        .auth-card input:focus { border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 3px var(--primary-light); }
-        .auth-btn {
-            width: 100%; margin-top: 20px; padding: 14px; background: var(--primary);
-            color: white; border: none; border-radius: 999px; font-size: 15px;
-            font-weight: 600; cursor: pointer; transition: all 0.25s ease;
-            box-shadow: 0 2px 8px rgba(74,144,217,0.25);
-        }
-        .auth-btn:hover { background: var(--primary-dark); box-shadow: 0 6px 20px rgba(74,144,217,0.35); transform: translateY(-2px); }
-        .auth-error { color: var(--red); font-size: 13px; margin-top: 14px; display: none; }
-
-        /* ===== HEADER ===== */
-        .header {
-            background: var(--white); border-bottom: 1px solid var(--border);
-            padding: 0 28px; display: flex; align-items: center; height: 60px;
-            position: -webkit-sticky; position: sticky; top: 0; z-index: 100;
-        }
-        .header-logo { height: 28px; }
-        .header-nav { display: flex; gap: 4px; margin-left: 24px; }
-        .header-nav a {
-            padding: 8px 16px; border-radius: 50px; font-size: 13px; font-weight: 500;
-            color: var(--text-2); text-decoration: none; transition: all 0.2s;
-        }
-        .header-nav a:hover { background: var(--primary-light); color: var(--primary); transform: translateY(-1px); }
-        .header-nav a.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(74,144,217,0.25); }
-        .header-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-        .header-btn {
-            padding: 8px 16px; border-radius: 999px; border: 1.5px solid var(--border);
-            background: var(--white); cursor: pointer; font-size: 13px; font-weight: 500;
-            color: var(--text-2); transition: all 0.2s; display: flex; align-items: center; gap: 6px;
-        }
-        .header-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-        .header-btn.logout { color: var(--text-muted); }
-        .header-btn.logout:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
-
-        /* ===== LAYOUT ===== */
         .container { max-width: 780px; margin: 0 auto; padding: 32px 32px 100px; }
         .page-header { margin-bottom: 28px; }
         .page-title { font-size: 24px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.3px; }
         .page-subtitle { font-size: 14px; color: var(--text-muted); font-weight: 400; }
 
-        /* ===== DOC TYPE SELECTOR ===== */
+        /* ===== DOC TYPE SELECTOR (Radio Card pattern) ===== */
         .type-selector {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px;
         }
         .type-card {
-            background: var(--white); border: 2px solid var(--border); border-radius: 16px;
-            padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s ease;
+            background: var(--white); border: 2px solid var(--border); border-radius: var(--radius-sm);
+            padding: 20px; cursor: pointer; transition: all 0.2s ease;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            position: relative;
         }
         .type-card:hover { border-color: var(--primary-muted); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-        .type-card.selected { border-color: var(--primary); background: var(--primary-light); }
-        .type-card .type-icon { margin-bottom: 10px; color: var(--primary); }
-        .type-card .type-icon i { width: 32px; height: 32px; stroke-width: 1.5; }
+        .type-card.selected { border-color: var(--primary); background: var(--primary-10); }
+        .type-card .type-radio { position: absolute; top: 12px; right: 12px; }
+        .type-card .type-icon { margin-bottom: 10px; }
+        .type-card .type-icon-wrap {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .type-card .type-icon-wrap.blue { background: var(--primary-10); color: var(--primary); }
+        .type-card .type-icon-wrap.orange { background: var(--orange-bg); color: var(--orange); }
+        .type-card .type-icon-wrap.green { background: var(--green-bg); color: var(--green); }
+        .type-card .type-icon-wrap i { width: 24px; height: 24px; stroke-width: 1.8; }
         .type-card .type-name { font-size: 14px; font-weight: 600; }
         .type-card .type-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
         /* ===== FORM ===== */
         .form-section {
             background: var(--white); border-radius: var(--radius); border: 1px solid var(--border);
-            padding: 28px; margin-bottom: 16px; box-shadow: var(--shadow-sm);
+            padding: 28px; margin-bottom: 16px; box-shadow: var(--shadow-xs);
         }
         .form-section-title {
             font-size: 15px; font-weight: 600; margin-bottom: 20px; color: var(--text);
             display: flex; align-items: center; gap: 8px;
         }
-        .form-section-title .section-icon { color: var(--primary); display: flex; align-items: center; }
+        .form-section-title .section-icon { display: flex; align-items: center; }
         .form-section-title .section-icon i { width: 18px; height: 18px; stroke-width: 1.8; }
         .form-group { margin-bottom: 16px; }
         .form-group:last-child { margin-bottom: 0; }
@@ -141,15 +64,18 @@
         .form-group label .required { color: var(--red); }
         .form-group label .hint { font-weight: 400; color: var(--text-muted); }
         .form-group input, .form-group textarea, .form-group select {
-            width: 100%; padding: 12px 16px; border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm); font-size: 14px; outline: none;
-            transition: all 0.2s; background: var(--bg); font-family: inherit;
+            width: 100%; padding: 13px 18px; border: 1px solid var(--border);
+            border-radius: 999px; font-size: 14px; outline: none;
+            transition: all var(--transition); background: var(--white); font-family: inherit;
         }
-        .form-group select { padding-right: 36px; }
+        .form-group textarea {
+            border-radius: var(--radius); min-height: 100px; resize: vertical;
+        }
+        .form-group select { padding-right: 36px; border-radius: 999px; }
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-            border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 3px var(--primary-light);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-10);
         }
-        .form-group textarea { min-height: 100px; resize: vertical; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 
@@ -168,8 +94,7 @@
         .file-list { margin-top: 12px; }
         .file-item {
             display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-            background: var(--bg); border-radius: var(--radius-xs); margin-bottom: 6px;
-            font-size: 13px;
+            background: var(--bg); border-radius: var(--radius-xs); margin-bottom: 6px; font-size: 13px;
         }
         .file-item .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .file-item .file-size { color: var(--text-muted); font-size: 12px; }
@@ -179,27 +104,28 @@
         }
         .file-remove:hover { color: var(--red); }
 
-        /* ===== CONTRACT SUBTYPE ===== */
+        /* ===== CONTRACT SUBTYPE (Radio Card) ===== */
         .subtype-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .subtype-card {
-            border: 2px solid var(--border); border-radius: 16px;
-            padding: 14px; cursor: pointer; transition: all 0.2s ease; text-align: center;
+            border: 2px solid var(--border); border-radius: var(--radius-sm);
+            padding: 14px 16px; cursor: pointer; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: space-between;
         }
         .subtype-card:hover { border-color: var(--primary-muted); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-        .subtype-card.selected { border-color: var(--primary); background: var(--primary-light); }
+        .subtype-card.selected { border-color: var(--primary); background: var(--primary-10); }
         .subtype-card .subtype-name { font-size: 13px; font-weight: 500; }
 
         /* ===== GENERATE BUTTON ===== */
         .generate-section { text-align: center; margin-top: 24px; }
         .generate-btn {
-            padding: 18px 56px; background: var(--primary); color: white; border: none;
+            padding: 16px 48px; background: var(--primary); color: white; border: none;
             border-radius: 999px; font-size: 16px; font-weight: 600;
             cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
-            box-shadow: 0 4px 14px rgba(74,144,217,0.3);
-            transition: all 0.25s ease;
+            transition: all 0.25s ease; font-family: inherit;
+            box-shadow: 0 2px 8px rgba(0,174,239,0.25);
         }
-        .generate-btn:hover { background: var(--primary-dark); box-shadow: 0 8px 24px rgba(74,144,217,0.4); transform: translateY(-3px); }
-        .generate-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(74,144,217,0.25); }
+        .generate-btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,174,239,0.35); }
+        .generate-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(0,174,239,0.25); }
         .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
         .generate-btn .spinner {
             width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
@@ -208,81 +134,57 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ===== RESULT LINK BUTTON ===== */
         .result-link-btn {
             display: inline-block; padding: 14px 40px; background: var(--primary); color: white;
             border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 15px;
-            margin-top: 8px; box-shadow: 0 4px 14px rgba(74,144,217,0.3);
-            transition: all 0.25s ease;
+            margin-top: 8px; transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(0,174,239,0.25);
         }
-        .result-link-btn:hover {
-            background: var(--primary-dark); box-shadow: 0 8px 24px rgba(74,144,217,0.4);
-            transform: translateY(-3px);
-        }
-        .result-link-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(74,144,217,0.25); }
+        .result-link-btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,174,239,0.35); }
+        .result-link-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(0,174,239,0.25); }
 
         /* ===== TOAST ===== */
         .toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 9999; }
-        .toast {
-            background: var(--text); color: white; padding: 12px 24px; border-radius: 50px;
-            font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg);
+        .toast-container .toast {
+            position: static; opacity: 1; transform: none; pointer-events: auto;
             animation: toastIn 0.3s ease;
         }
         @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* ===== TZ ROWS ===== */
-        .tz-row {
-            display: grid; grid-template-columns: 40px 1fr 120px 140px 32px; gap: 8px;
-            align-items: start; margin-bottom: 8px;
-        }
-        .tz-row input, .tz-row textarea {
-            padding: 10px 12px; font-size: 13px;
-        }
+        .tz-row { display: grid; grid-template-columns: 40px 1fr 120px 140px 32px; gap: 8px; align-items: start; margin-bottom: 8px; }
+        .tz-row input, .tz-row textarea { padding: 10px 12px; font-size: 13px; }
         .tz-row textarea { min-height: 60px; }
-        .tz-row-num {
-            padding: 10px 0; text-align: center; font-size: 13px; font-weight: 500;
-            color: var(--text-muted);
-        }
+        .tz-row-num { padding: 10px 0; text-align: center; font-size: 13px; font-weight: 500; color: var(--text-muted); }
         .tz-add-btn {
             display: flex; align-items: center; gap: 6px; padding: 8px 14px;
             background: none; border: 1.5px dashed var(--border); border-radius: 50px;
-            color: var(--text-muted); cursor: pointer; font-size: 13px; transition: all 0.2s ease;
+            color: var(--text-muted); cursor: pointer; font-size: 13px; transition: all 0.2s ease; font-family: inherit;
         }
         .tz-add-btn:hover { border-color: var(--primary); color: var(--primary); }
-        .tz-remove {
-            background: none; border: none; color: var(--text-muted); cursor: pointer;
-            font-size: 18px; padding: 8px 0; transition: color 0.2s;
-        }
+        .tz-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 8px 0; transition: color 0.2s; }
         .tz-remove:hover { color: var(--red); }
-        .tz-header {
-            display: grid; grid-template-columns: 40px 1fr 120px 140px 32px; gap: 8px;
-            margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--text-muted);
-        }
+        .tz-header { display: grid; grid-template-columns: 40px 1fr 120px 140px 32px; gap: 8px; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
 
-        /* ===== ACT BASIS ===== */
+        /* ===== ACT BASIS (Radio Card) ===== */
         .basis-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
         .basis-card {
-            border: 2px solid var(--border); border-radius: 16px;
-            padding: 14px; cursor: pointer; transition: all 0.2s ease; text-align: center;
+            border: 2px solid var(--border); border-radius: var(--radius-sm);
+            padding: 14px 16px; cursor: pointer; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: space-between;
         }
         .basis-card:hover { border-color: var(--primary-muted); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-        .basis-card.selected { border-color: var(--primary); background: var(--primary-light); }
+        .basis-card.selected { border-color: var(--primary); background: var(--primary-10); }
         .basis-card .basis-name { font-size: 13px; font-weight: 500; }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .header { padding: 0 12px; height: 52px; }
-            .header-logo { height: 24px; flex-shrink: 0; }
-            .header-nav { margin-left: 8px; gap: 2px; flex-shrink: 0; }
-            .header-nav a { padding: 6px 12px; font-size: 12px; white-space: nowrap; }
-            .header-actions { gap: 4px; flex-shrink: 0; }
-            .header-btn { padding: 8px; width: 36px; height: 36px; justify-content: center; border-radius: 999px; font-size: 12px; }
-            .header-btn.logout { width: auto; padding: 6px 14px; }
             .container { padding: 16px 12px 80px; }
             .page-title { font-size: 20px; }
             .page-subtitle { font-size: 13px; }
             .type-selector { grid-template-columns: 1fr; gap: 8px; }
-            .type-card { padding: 16px; }
+            .type-card { padding: 16px; flex-direction: row; gap: 12px; text-align: left; }
+            .type-card .type-radio { position: static; }
             .subtype-selector { grid-template-columns: 1fr; gap: 8px; }
             .basis-selector { grid-template-columns: 1fr; gap: 8px; }
             .form-section { padding: 20px 16px; margin-bottom: 12px; }
@@ -292,7 +194,6 @@
             .tz-row input, .tz-row textarea { font-size: 14px; }
             .generate-btn { padding: 16px 36px; font-size: 15px; width: 100%; justify-content: center; }
             .result-link-btn { padding: 14px 32px; font-size: 14px; }
-            .auth-card { padding: 40px 24px; margin: 0 16px; }
         }
 
         /* ===== HISTORY ===== */
@@ -309,17 +210,21 @@
             position: sticky; top: 0; background: var(--white); z-index: 1;
         }
         .history-header h3 { font-size: 16px; font-weight: 600; }
-        .history-close {
-            background: none; border: none; cursor: pointer; color: var(--text-muted);
-            padding: 4px; transition: color 0.2s;
-        }
+        .history-close { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; transition: color 0.2s; font-family: inherit; }
         .history-close:hover { color: var(--text); }
         .history-list { padding: 12px; flex: 1; }
         .history-item {
             display: flex; align-items: center; gap: 12px; padding: 14px 16px;
             border-radius: 12px; margin-bottom: 6px; transition: background 0.15s;
             text-decoration: none; color: var(--text);
+            animation: historySlideIn 0.25s ease forwards; opacity: 0;
         }
+        .history-item:nth-child(1) { animation-delay: 0ms; }
+        .history-item:nth-child(2) { animation-delay: 50ms; }
+        .history-item:nth-child(3) { animation-delay: 100ms; }
+        .history-item:nth-child(4) { animation-delay: 150ms; }
+        .history-item:nth-child(5) { animation-delay: 200ms; }
+        .history-item:nth-child(n+6) { animation-delay: 250ms; }
         .history-item:hover { background: var(--bg); }
         .history-item-icon { color: var(--primary); flex-shrink: 0; }
         .history-item-info { flex: 1; min-width: 0; }
@@ -331,16 +236,14 @@
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
         .history-overlay.open { opacity: 1; pointer-events: auto; }
-
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<!-- AUTH SCREEN (hidden until auth check completes) -->
+<!-- AUTH SCREEN -->
 <div class="auth-screen" id="authScreen" style="display:none">
     <div class="auth-card">
-        <img src="logo.png" alt="Эталон">
+        <img src="logo.png" alt="Эталон" class="auth-logo">
         <h2>Генератор документов</h2>
         <p>Войдите для генерации PDF</p>
         <form onsubmit="event.preventDefault(); login()">
@@ -372,20 +275,23 @@
             <p class="page-subtitle">Создайте договор, дополнительное соглашение или итоговый акт</p>
         </div>
 
-        <!-- STEP 1: TYPE SELECTION -->
+        <!-- STEP 1: TYPE SELECTION (Radio Card pattern) -->
         <div class="type-selector">
             <div class="type-card" onclick="selectType('contract')" id="type-contract">
-                <div class="type-icon"><i data-lucide="file-text"></i></div>
+                <span class="type-radio"><span class="radio-indicator"></span></span>
+                <div class="type-icon"><span class="type-icon-wrap blue"><i data-lucide="file-text"></i></span></div>
                 <div class="type-name">Договор</div>
                 <div class="type-desc">4 типа услуг, ТЗ, реквизиты</div>
             </div>
             <div class="type-card" onclick="selectType('amendment')" id="type-amendment">
-                <div class="type-icon"><i data-lucide="file-pen"></i></div>
+                <span class="type-radio"><span class="radio-indicator"></span></span>
+                <div class="type-icon"><span class="type-icon-wrap orange"><i data-lucide="file-pen"></i></span></div>
                 <div class="type-name">Доп. соглашение</div>
                 <div class="type-desc">Изменение условий договора</div>
             </div>
             <div class="type-card" onclick="selectType('act')" id="type-act">
-                <div class="type-icon"><i data-lucide="file-check"></i></div>
+                <span class="type-radio"><span class="radio-indicator"></span></span>
+                <div class="type-icon"><span class="type-icon-wrap green"><i data-lucide="file-check"></i></span></div>
                 <div class="type-name">Итоговый акт</div>
                 <div class="type-desc">Акт о выполненных работах</div>
             </div>
@@ -512,26 +418,30 @@ function renderContractForm() {
     return `
     <!-- Contract Subtype -->
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="layers"></i></span> Тип услуги</div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-blue"><i data-lucide="layers"></i></span></span> Тип услуги</div>
         <div class="subtype-selector">
             <div class="subtype-card ${selectedSubtype==='tilda'?'selected':''}" onclick="selectSubtype('tilda')">
                 <div class="subtype-name">Разработка сайта на Tilda</div>
+                <span class="radio-indicator"></span>
             </div>
             <div class="subtype-card ${selectedSubtype==='avito'?'selected':''}" onclick="selectSubtype('avito')">
                 <div class="subtype-name">Продвижение на Авито</div>
+                <span class="radio-indicator"></span>
             </div>
             <div class="subtype-card ${selectedSubtype==='yandex'?'selected':''}" onclick="selectSubtype('yandex')">
                 <div class="subtype-name">Продвижение в Яндекс Директе</div>
+                <span class="radio-indicator"></span>
             </div>
             <div class="subtype-card ${selectedSubtype==='optimize'?'selected':''}" onclick="selectSubtype('optimize')">
                 <div class="subtype-name">Повышение эффективности сайта</div>
+                <span class="radio-indicator"></span>
             </div>
         </div>
     </div>
 
     <!-- Contract Details -->
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="clipboard-list"></i></span> Данные договора</div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-blue"><i data-lucide="clipboard-list"></i></span></span> Данные договора</div>
         <div class="form-row">
             <div class="form-group">
                 <label>Номер договора <span class="required">*</span> <span id="nextNumHint" style="font-weight:400;color:var(--primary);font-size:12px;cursor:pointer" onclick="applyNextNum()"></span></label>
@@ -548,7 +458,7 @@ function renderContractForm() {
 
     <!-- Payment -->
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="banknote"></i></span> Оплата</div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-green"><i data-lucide="banknote"></i></span></span> Оплата</div>
         <div class="form-row">
             <div class="form-group">
                 <label>Общая сумма, руб. <span class="required">*</span></label>
@@ -572,7 +482,7 @@ function renderContractForm() {
 
     <!-- TZ -->
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="list-checks"></i></span> Техническое задание</div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-orange"><i data-lucide="list-checks"></i></span></span> Техническое задание</div>
         <div class="form-group">
             <label>Общий срок выполнения, дней <span class="required">*</span></label>
             <input type="number" id="totalDays" placeholder="30">
@@ -587,10 +497,9 @@ function renderContractForm() {
         </div>
     </div>
 
-    <!-- File Attachments -->
     <!-- Additional notes -->
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="message-square-text"></i></span> Дополнительные пожелания <span class="hint" style="font-weight:400;color:var(--text-muted);font-size:12px;margin-left:4px">(необязательно)</span></div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-teal"><i data-lucide="message-square-text"></i></span></span> Дополнительные пожелания <span class="hint" style="font-weight:400;color:var(--text-muted);font-size:12px;margin-left:4px">(необязательно)</span></div>
         <div class="form-group">
             <label>Пожелания к договору <span class="hint">(например: "WordPress вместо Tilda", "срок 60 дней" и т.д.)</span></label>
             <textarea id="additionalNotes" placeholder="Например: Платформа WordPress вместо Tilda, ссылка https://wordpress.org/. Или: оплата 30/70 вместо 50/50" style="min-height:80px"></textarea>
@@ -605,7 +514,7 @@ function renderAmendmentForm() {
     return `
     <!-- Amendment Details -->
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="clipboard-list"></i></span> Данные доп. соглашения</div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-orange"><i data-lucide="clipboard-list"></i></span></span> Данные доп. соглашения</div>
         <div class="form-row">
             <div class="form-group">
                 <label>Номер ДС <span class="required">*</span></label>
@@ -639,7 +548,7 @@ function renderAmendmentForm() {
 
     <!-- Amendment Subject -->
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="pen-line"></i></span> Предмет доп. соглашения</div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-orange"><i data-lucide="pen-line"></i></span></span> Предмет доп. соглашения</div>
         <div class="form-group">
             <label>Суть ДС (п. 1.1) <span class="required">*</span></label>
             <textarea id="amendSubject" placeholder="увеличить оплату за работу по разработке сайта на 5 000 (пять тысяч) рублей..."></textarea>
@@ -668,7 +577,7 @@ function renderAmendmentForm() {
     ${renderClientFields()}
 
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="message-square-text"></i></span> Дополнительные пожелания <span class="hint" style="font-weight:400;color:var(--text-muted);font-size:12px;margin-left:4px">(необязательно)</span></div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-teal"><i data-lucide="message-square-text"></i></span></span> Дополнительные пожелания <span class="hint" style="font-weight:400;color:var(--text-muted);font-size:12px;margin-left:4px">(необязательно)</span></div>
         <div class="form-group"><label>Пожелания к документу</label><textarea id="additionalNotes" placeholder="Любые дополнительные указания..." style="min-height:80px"></textarea></div>
     </div>
 
@@ -680,7 +589,7 @@ function renderActForm() {
     return `
     <!-- Act Details -->
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="clipboard-list"></i></span> Данные итогового акта</div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-green"><i data-lucide="clipboard-list"></i></span></span> Данные итогового акта</div>
         <div class="form-row">
             <div class="form-group">
                 <label>Дата итогового акта <span class="required">*</span></label>
@@ -695,78 +604,51 @@ function renderActForm() {
 
     <!-- Basis Type -->
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="file-stack"></i></span> Тип основания</div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-blue"><i data-lucide="file-stack"></i></span></span> Тип основания</div>
         <div class="basis-selector">
             <div class="basis-card ${selectedBasis==='contract'?'selected':''}" onclick="selectBasis('contract')">
                 <div class="basis-name">Договор</div>
+                <span class="radio-indicator"></span>
             </div>
             <div class="basis-card ${selectedBasis==='amendment'?'selected':''}" onclick="selectBasis('amendment')">
                 <div class="basis-name">Доп. соглашение</div>
+                <span class="radio-indicator"></span>
             </div>
             <div class="basis-card ${selectedBasis==='intermediate'?'selected':''}" onclick="selectBasis('intermediate')">
                 <div class="basis-name">Промежуточный акт</div>
+                <span class="radio-indicator"></span>
             </div>
         </div>
 
         <!-- Basis: Contract -->
         <div id="basisContract" class="${selectedBasis==='contract'?'':'hidden'}">
             <div class="form-row">
-                <div class="form-group">
-                    <label>Номер договора <span class="required">*</span></label>
-                    <input type="text" id="actContractNumber" placeholder="59">
-                </div>
-                <div class="form-group">
-                    <label>Дата договора <span class="required">*</span></label>
-                    <input type="date" id="actContractDate">
-                </div>
+                <div class="form-group"><label>Номер договора <span class="required">*</span></label><input type="text" id="actContractNumber" placeholder="59"></div>
+                <div class="form-group"><label>Дата договора <span class="required">*</span></label><input type="date" id="actContractDate"></div>
             </div>
         </div>
 
         <!-- Basis: Amendment -->
         <div id="basisAmendment" class="${selectedBasis==='amendment'?'':'hidden'}">
             <div class="form-row">
-                <div class="form-group">
-                    <label>Номер ДС</label>
-                    <input type="text" id="actAmendNumber" placeholder="1">
-                </div>
-                <div class="form-group">
-                    <label>Дата ДС <span class="required">*</span></label>
-                    <input type="date" id="actAmendDate">
-                </div>
+                <div class="form-group"><label>Номер ДС</label><input type="text" id="actAmendNumber" placeholder="1"></div>
+                <div class="form-group"><label>Дата ДС <span class="required">*</span></label><input type="date" id="actAmendDate"></div>
             </div>
             <div class="form-row">
-                <div class="form-group">
-                    <label>Номер договора <span class="required">*</span></label>
-                    <input type="text" id="actAmendContractNumber" placeholder="59">
-                </div>
-                <div class="form-group">
-                    <label>Дата договора <span class="required">*</span></label>
-                    <input type="date" id="actAmendContractDate">
-                </div>
+                <div class="form-group"><label>Номер договора <span class="required">*</span></label><input type="text" id="actAmendContractNumber" placeholder="59"></div>
+                <div class="form-group"><label>Дата договора <span class="required">*</span></label><input type="date" id="actAmendContractDate"></div>
             </div>
         </div>
 
         <!-- Basis: Intermediate act -->
         <div id="basisIntermediate" class="${selectedBasis==='intermediate'?'':'hidden'}">
             <div class="form-row">
-                <div class="form-group">
-                    <label>Номер промежуточного акта</label>
-                    <input type="text" id="actIntNumber" placeholder="1">
-                </div>
-                <div class="form-group">
-                    <label>Дата промежуточного акта <span class="required">*</span></label>
-                    <input type="date" id="actIntDate">
-                </div>
+                <div class="form-group"><label>Номер промежуточного акта</label><input type="text" id="actIntNumber" placeholder="1"></div>
+                <div class="form-group"><label>Дата промежуточного акта <span class="required">*</span></label><input type="date" id="actIntDate"></div>
             </div>
             <div class="form-row">
-                <div class="form-group">
-                    <label>Номер договора <span class="required">*</span></label>
-                    <input type="text" id="actIntContractNumber" placeholder="59">
-                </div>
-                <div class="form-group">
-                    <label>Дата договора <span class="required">*</span></label>
-                    <input type="date" id="actIntContractDate">
-                </div>
+                <div class="form-group"><label>Номер договора <span class="required">*</span></label><input type="text" id="actIntContractNumber" placeholder="59"></div>
+                <div class="form-group"><label>Дата договора <span class="required">*</span></label><input type="date" id="actIntContractDate"></div>
             </div>
         </div>
     </div>
@@ -774,7 +656,7 @@ function renderActForm() {
     ${renderClientFields()}
 
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="message-square-text"></i></span> Дополнительные пожелания <span class="hint" style="font-weight:400;color:var(--text-muted);font-size:12px;margin-left:4px">(необязательно)</span></div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-teal"><i data-lucide="message-square-text"></i></span></span> Дополнительные пожелания <span class="hint" style="font-weight:400;color:var(--text-muted);font-size:12px;margin-left:4px">(необязательно)</span></div>
         <div class="form-group"><label>Пожелания к документу</label><textarea id="additionalNotes" placeholder="Любые дополнительные указания..." style="min-height:80px"></textarea></div>
     </div>
 
@@ -794,7 +676,7 @@ function renderFileUpload() {
 
     return `
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="paperclip"></i></span> Прикреплённые файлы <span class="hint" style="font-weight:400;color:var(--text-muted);font-size:12px;margin-left:4px">(необязательно)</span></div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-blue"><i data-lucide="paperclip"></i></span></span> Прикреплённые файлы <span class="hint" style="font-weight:400;color:var(--text-muted);font-size:12px;margin-left:4px">(необязательно)</span></div>
         <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('fileInput').click()"
              ondragover="event.preventDefault();this.classList.add('dragover')"
              ondragleave="this.classList.remove('dragover')"
@@ -827,7 +709,7 @@ function renderClientFields() {
     const isOoo = selectedClientType === 'ooo';
     return `
     <div class="form-section">
-        <div class="form-section-title"><span class="section-icon"><i data-lucide="building-2"></i></span> Реквизиты заказчика</div>
+        <div class="form-section-title"><span class="section-icon"><span class="icon-badge icon-badge-red"><i data-lucide="building-2"></i></span></span> Реквизиты заказчика</div>
         <div class="form-group">
             <label>Тип заказчика</label>
             <select id="clientType" onchange="selectedClientType=this.value;toggleClientFields()">
@@ -845,23 +727,11 @@ function renderClientFields() {
             <input type="text" id="clientDirector" placeholder="Иванов Иван Иванович">
         </div>
         <div class="form-row">
-            <div class="form-group">
-                <label>ИНН <span class="required">*</span></label>
-                <input type="text" id="clientInn" placeholder="246300000000">
-            </div>
-            <div class="form-group">
-                <label id="clientOgrnLabel">${isOoo ? 'ОГРН' : 'ОГРНИП / ОГРН'}</label>
-                <input type="text" id="clientOgrn" placeholder="${isOoo ? '1022400000000' : '3252468...'}">
-            </div>
+            <div class="form-group"><label>ИНН <span class="required">*</span></label><input type="text" id="clientInn" placeholder="246300000000"></div>
+            <div class="form-group"><label id="clientOgrnLabel">${isOoo ? 'ОГРН' : 'ОГРНИП / ОГРН'}</label><input type="text" id="clientOgrn" placeholder="${isOoo ? '1022400000000' : '3252468...'}"></div>
         </div>
-        <div class="form-group">
-            <label>Юридический адрес</label>
-            <input type="text" id="clientAddress" placeholder="г. Красноярск, ул. ...">
-        </div>
-        <div class="form-group">
-            <label>Фактический адрес <span class="hint">(если отличается)</span></label>
-            <input type="text" id="clientAddressFact" placeholder="г. Красноярск, ул. ...">
-        </div>
+        <div class="form-group"><label>Юридический адрес</label><input type="text" id="clientAddress" placeholder="г. Красноярск, ул. ..."></div>
+        <div class="form-group"><label>Фактический адрес <span class="hint">(если отличается)</span></label><input type="text" id="clientAddressFact" placeholder="г. Красноярск, ул. ..."></div>
         <div class="form-row">
             <div class="form-group"><label>Телефон</label><input type="text" id="clientPhone" placeholder="+7 ..."></div>
             <div class="form-group"><label>Электронная почта</label><input type="email" id="clientEmail" placeholder="client@mail.ru"></div>
@@ -908,12 +778,8 @@ function toggleClientFields() {
     const ct = document.getElementById('clientType');
     if (!ct) return;
     selectedClientType = ct.value;
-    const nameLabel = document.querySelector('label[for="clientName"], #clientNameLabel');
     const nameInput = document.getElementById('clientName');
-    const ogrnLabel = document.querySelector('#clientOgrnLabel');
     const directorGroup = document.getElementById('clientDirectorGroup');
-
-    // Update name label
     const nl = document.getElementById('clientNameLabel');
     if (nl) {
         if (ct.value === 'ooo') {
@@ -924,22 +790,15 @@ function toggleClientFields() {
             if (nameInput) nameInput.placeholder = 'Иванов Иван Иванович';
         }
     }
-    // Show/hide director field
-    if (directorGroup) {
-        directorGroup.style.display = ct.value === 'ooo' ? 'block' : 'none';
-    }
-    // Update OGRN label
-    if (ogrnLabel) {
-        ogrnLabel.textContent = ct.value === 'ooo' ? 'ОГРН' : 'ОГРНИП / ОГРН';
-    }
+    if (directorGroup) directorGroup.style.display = ct.value === 'ooo' ? 'block' : 'none';
+    const ogrnLabel = document.querySelector('#clientOgrnLabel');
+    if (ogrnLabel) ogrnLabel.textContent = ct.value === 'ooo' ? 'ОГРН' : 'ОГРНИП / ОГРН';
 }
 
 function saveFormState() {
     const state = {};
     document.querySelectorAll('#formArea input, #formArea textarea, #formArea select').forEach(el => {
-        if (el.id && !el.id.startsWith('tz_') && el.id !== 'fileInput') {
-            state[el.id] = el.value;
-        }
+        if (el.id && !el.id.startsWith('tz_') && el.id !== 'fileInput') state[el.id] = el.value;
     });
     saveTzRows();
     return state;
@@ -952,17 +811,10 @@ function restoreFormState(state) {
             const el = document.getElementById(id);
             if (el) el.value = val;
         });
-        // Restore visibility of conditional sections
         const pf = document.getElementById('paymentFormat');
-        if (pf) {
-            const cg = document.getElementById('customPaymentGroup');
-            if (cg) cg.classList.toggle('hidden', pf.value !== 'custom');
-        }
+        if (pf) { const cg = document.getElementById('customPaymentGroup'); if (cg) cg.classList.toggle('hidden', pf.value !== 'custom'); }
         const ap = document.getElementById('amendIsPayment');
-        if (ap) {
-            const af = document.getElementById('amendPaymentFields');
-            if (af) af.classList.toggle('hidden', ap.value !== 'yes');
-        }
+        if (ap) { const af = document.getElementById('amendPaymentFields'); if (af) af.classList.toggle('hidden', ap.value !== 'yes'); }
     });
 }
 
@@ -981,7 +833,6 @@ function removeFile(i) {
 }
 
 function addTzRow() {
-    // Save current values
     saveTzRows();
     tzRows.push({ desc: '', days: '', cost: '' });
     document.getElementById('tzRowsContainer').innerHTML = renderTzRows();
@@ -993,9 +844,7 @@ function removeTzRow(i) {
     document.getElementById('tzRowsContainer').innerHTML = renderTzRows();
 }
 
-function updateTzRow(i, field, val) {
-    tzRows[i][field] = val;
-}
+function updateTzRow(i, field, val) { tzRows[i][field] = val; }
 
 function saveTzRows() {
     tzRows.forEach((r, i) => {
@@ -1015,11 +864,7 @@ document.getElementById('formArea').addEventListener('change', e => {
     }
 });
 
-// ===== HELPERS =====
-function getVal(id) {
-    const el = document.getElementById(id);
-    return el ? el.value.trim() : '';
-}
+function getVal(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
 // ===== AUTO NUMBER =====
 async function loadNextNumber() {
@@ -1032,10 +877,7 @@ async function loadNextNumber() {
             .limit(50)
             .get();
         let maxNum = 0;
-        snap.forEach(doc => {
-            const n = parseInt(doc.data().contractNumber);
-            if (!isNaN(n) && n > maxNum) maxNum = n;
-        });
+        snap.forEach(doc => { const n = parseInt(doc.data().contractNumber); if (!isNaN(n) && n > maxNum) maxNum = n; });
         const hint = document.getElementById('nextNumHint');
         const input = document.getElementById('contractNumber');
         if (maxNum > 0) {
@@ -1049,29 +891,21 @@ async function loadNextNumber() {
 function applyNextNum() {
     const hint = document.getElementById('nextNumHint');
     const input = document.getElementById('contractNumber');
-    if (hint && hint.dataset.next && input) {
-        input.value = hint.dataset.next;
-    }
+    if (hint && hint.dataset.next && input) input.value = hint.dataset.next;
 }
 
-// Make all date inputs open picker on any click (label, input, anywhere in form-group)
 document.addEventListener('click', function(e) {
-    // Click on label → open picker
     if (e.target.tagName === 'LABEL') {
         const forInput = e.target.closest('.form-group')?.querySelector('input[type="date"]');
         if (forInput) forInput.showPicker();
         return;
     }
-    // Click on date input itself → open picker
-    if (e.target.type === 'date') {
-        e.target.showPicker();
-    }
+    if (e.target.type === 'date') e.target.showPicker();
 });
 
 // ===== VALIDATION =====
 function validate() {
     const required = [];
-
     if (selectedType === 'contract') {
         if (!selectedSubtype) required.push('Тип услуги');
         if (!getVal('contractNumber')) required.push('Номер договора');
@@ -1092,14 +926,9 @@ function validate() {
         if (!selectedBasis) required.push('Тип основания');
         if (!getVal('clientName')) required.push(selectedClientType === 'ooo' ? 'Название компании' : 'ФИО');
     }
-
-    if (required.length > 0) {
-        toast('Заполните: ' + required.join(', '));
-        return false;
-    }
+    if (required.length > 0) { toast('Заполните: ' + required.join(', ')); return false; }
     return true;
 }
-
 
 // ===== DOCUMENT GENERATION (API) =====
 async function generateDoc() {
@@ -1119,24 +948,15 @@ async function generateDoc() {
             endpoint = '/api/generate/contract';
             body = {
                 subtype: selectedSubtype,
-                contractNumber: getVal('contractNumber'),
-                contractDate: getVal('contractDate'),
-                clientType: getVal('clientType'),
-                clientName: getVal('clientName'),
-                clientDirector: getVal('clientDirector'),
-                clientInn: getVal('clientInn'),
-                clientOgrn: getVal('clientOgrn'),
-                clientAddress: getVal('clientAddress'),
-                clientAddressFact: getVal('clientAddressFact'),
-                clientPhone: getVal('clientPhone'),
-                clientEmail: getVal('clientEmail'),
-                clientAccount: getVal('clientAccount'),
-                clientBank: getVal('clientBank'),
-                clientBik: getVal('clientBik'),
-                clientCorr: getVal('clientCorr'),
+                contractNumber: getVal('contractNumber'), contractDate: getVal('contractDate'),
+                clientType: getVal('clientType'), clientName: getVal('clientName'),
+                clientDirector: getVal('clientDirector'), clientInn: getVal('clientInn'),
+                clientOgrn: getVal('clientOgrn'), clientAddress: getVal('clientAddress'),
+                clientAddressFact: getVal('clientAddressFact'), clientPhone: getVal('clientPhone'),
+                clientEmail: getVal('clientEmail'), clientAccount: getVal('clientAccount'),
+                clientBank: getVal('clientBank'), clientBik: getVal('clientBik'), clientCorr: getVal('clientCorr'),
                 totalAmount: parseInt(getVal('totalAmount')) || 0,
-                paymentFormat: getVal('paymentFormat'),
-                customPayment: getVal('customPayment'),
+                paymentFormat: getVal('paymentFormat'), customPayment: getVal('customPayment'),
                 totalDays: parseInt(getVal('totalDays')) || 30,
                 tzRows: tzRows.filter(r => r.desc),
                 additionalNotes: getVal('additionalNotes'),
@@ -1144,54 +964,34 @@ async function generateDoc() {
         } else if (selectedType === 'amendment') {
             endpoint = '/api/generate/amendment';
             body = {
-                amendNumber: getVal('amendNumber'),
-                amendDate: getVal('amendDate'),
-                contractNumber: getVal('amendContractNumber'),
-                contractDate: getVal('amendContractDate'),
-                serviceName: getVal('amendServiceName'),
-                subject: getVal('amendSubject'),
+                amendNumber: getVal('amendNumber'), amendDate: getVal('amendDate'),
+                contractNumber: getVal('amendContractNumber'), contractDate: getVal('amendContractDate'),
+                serviceName: getVal('amendServiceName'), subject: getVal('amendSubject'),
                 isPayment: getVal('amendIsPayment') === 'yes',
                 finalAmount: parseInt(getVal('amendFinalAmount')) || 0,
-                clientType: getVal('clientType'),
-                clientName: getVal('clientName'),
-                clientDirector: getVal('clientDirector'),
-                clientInn: getVal('clientInn'),
-                clientOgrn: getVal('clientOgrn'),
-                clientAddress: getVal('clientAddress'),
-                clientAddressFact: getVal('clientAddressFact'),
-                clientPhone: getVal('clientPhone'),
-                clientEmail: getVal('clientEmail'),
-                clientAccount: getVal('clientAccount'),
-                clientBank: getVal('clientBank'),
-                clientBik: getVal('clientBik'),
-                clientCorr: getVal('clientCorr'),
+                clientType: getVal('clientType'), clientName: getVal('clientName'),
+                clientDirector: getVal('clientDirector'), clientInn: getVal('clientInn'),
+                clientOgrn: getVal('clientOgrn'), clientAddress: getVal('clientAddress'),
+                clientAddressFact: getVal('clientAddressFact'), clientPhone: getVal('clientPhone'),
+                clientEmail: getVal('clientEmail'), clientAccount: getVal('clientAccount'),
+                clientBank: getVal('clientBank'), clientBik: getVal('clientBik'), clientCorr: getVal('clientCorr'),
                 additionalNotes: getVal('additionalNotes'),
             };
         } else if (selectedType === 'act') {
             endpoint = '/api/generate/act';
             body = {
-                actDate: getVal('actDate'),
-                amount: parseInt(getVal('actAmount')) || 0,
+                actDate: getVal('actDate'), amount: parseInt(getVal('actAmount')) || 0,
                 basisType: selectedBasis,
                 contractNumber: getVal('actContractNumber') || getVal('actAmendContractNumber') || getVal('actIntContractNumber'),
                 contractDate: getVal('actContractDate') || getVal('actAmendContractDate') || getVal('actIntContractDate'),
-                amendNumber: getVal('actAmendNumber'),
-                amendDate: getVal('actAmendDate'),
-                intNumber: getVal('actIntNumber'),
-                intDate: getVal('actIntDate'),
-                clientType: getVal('clientType'),
-                clientName: getVal('clientName'),
-                clientDirector: getVal('clientDirector'),
-                clientInn: getVal('clientInn'),
-                clientOgrn: getVal('clientOgrn'),
-                clientAddress: getVal('clientAddress'),
-                clientAddressFact: getVal('clientAddressFact'),
-                clientPhone: getVal('clientPhone'),
-                clientEmail: getVal('clientEmail'),
-                clientAccount: getVal('clientAccount'),
-                clientBank: getVal('clientBank'),
-                clientBik: getVal('clientBik'),
-                clientCorr: getVal('clientCorr'),
+                amendNumber: getVal('actAmendNumber'), amendDate: getVal('actAmendDate'),
+                intNumber: getVal('actIntNumber'), intDate: getVal('actIntDate'),
+                clientType: getVal('clientType'), clientName: getVal('clientName'),
+                clientDirector: getVal('clientDirector'), clientInn: getVal('clientInn'),
+                clientOgrn: getVal('clientOgrn'), clientAddress: getVal('clientAddress'),
+                clientAddressFact: getVal('clientAddressFact'), clientPhone: getVal('clientPhone'),
+                clientEmail: getVal('clientEmail'), clientAccount: getVal('clientAccount'),
+                clientBank: getVal('clientBank'), clientBik: getVal('clientBik'), clientCorr: getVal('clientCorr'),
                 additionalNotes: getVal('additionalNotes'),
             };
         }
@@ -1202,10 +1002,7 @@ async function generateDoc() {
             body: JSON.stringify(body),
         });
 
-        if (!resp.ok) {
-            const err = await resp.json();
-            throw new Error(err.detail || 'Ошибка сервера');
-        }
+        if (!resp.ok) { const err = await resp.json(); throw new Error(err.detail || 'Ошибка сервера'); }
 
         const result = await resp.json();
         document.getElementById('resultLink').href = result.url;
@@ -1213,23 +1010,15 @@ async function generateDoc() {
         lucide.createIcons();
         toast('Документ создан!');
 
-        // Save to history
         saveToHistory({
-            type: selectedType,
-            url: result.url,
-            clientName: body.clientName || '',
-            contractNumber: body.contractNumber || '',
+            type: selectedType, url: result.url,
+            clientName: body.clientName || '', contractNumber: body.contractNumber || '',
             amendNumber: body.amendNumber || '',
             date: body.contractDate || body.amendDate || body.actDate || new Date().toISOString().slice(0,10),
         });
 
-    } catch(e) {
-        console.error(e);
-        toast('Ошибка: ' + e.message);
-    } finally {
-        btn.disabled = false;
-        spinner.style.display = 'none';
-    }
+    } catch(e) { console.error(e); toast('Ошибка: ' + e.message); }
+    finally { btn.disabled = false; spinner.style.display = 'none'; }
 }
 
 // ===== HISTORY =====
@@ -1238,8 +1027,7 @@ async function saveToHistory(item) {
         const user = auth.currentUser;
         if (!user) return;
         await db.collection('users').doc(user.uid).collection('history').add({
-            ...item,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            ...item, createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
     } catch(e) { console.error('saveToHistory:', e); }
 }
@@ -1248,33 +1036,19 @@ function toggleHistory() {
     const panel = document.getElementById('historyPanel');
     const overlay = document.getElementById('historyOverlay');
     const isOpen = panel.classList.contains('open');
-    if (isOpen) {
-        panel.classList.remove('open');
-        overlay.classList.remove('open');
-    } else {
-        renderHistory();
-        panel.classList.add('open');
-        overlay.classList.add('open');
-    }
+    if (isOpen) { panel.classList.remove('open'); overlay.classList.remove('open'); }
+    else { renderHistory(); panel.classList.add('open'); overlay.classList.add('open'); }
 }
 
 async function renderHistory() {
     const list = document.getElementById('historyList');
     const user = auth.currentUser;
-    if (!user) {
-        list.innerHTML = '<div class="history-empty"><p>Войдите для просмотра истории</p></div>';
-        return;
-    }
+    if (!user) { list.innerHTML = '<div class="history-empty"><p>Войдите для просмотра истории</p></div>'; return; }
     list.innerHTML = '<div class="history-empty"><p>Загрузка...</p></div>';
     try {
         const snap = await db.collection('users').doc(user.uid).collection('history')
-            .orderBy('createdAt', 'desc')
-            .limit(50)
-            .get();
-        if (snap.empty) {
-            list.innerHTML = '<div class="history-empty"><p>Пока нет сгенерированных документов</p></div>';
-            return;
-        }
+            .orderBy('createdAt', 'desc').limit(50).get();
+        if (snap.empty) { list.innerHTML = '<div class="history-empty"><p>Пока нет сгенерированных документов</p></div>'; return; }
         const typeLabels = { contract: 'Договор', amendment: 'Доп. соглашение', act: 'Итоговый акт' };
         const typeIcons = { contract: 'file-text', amendment: 'file-pen', act: 'file-check' };
         let html = '';
@@ -1296,13 +1070,9 @@ async function renderHistory() {
         });
         list.innerHTML = html;
         lucide.createIcons();
-    } catch(e) {
-        console.error('renderHistory:', e);
-        list.innerHTML = '<div class="history-empty"><p>Ошибка загрузки истории</p></div>';
-    }
+    } catch(e) { console.error('renderHistory:', e); list.innerHTML = '<div class="history-empty"><p>Ошибка загрузки истории</p></div>'; }
 }
 
-// Initialize Lucide icons on page load
 lucide.createIcons();
 </script>
 

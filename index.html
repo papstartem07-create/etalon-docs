@@ -6,161 +6,43 @@
     <title>Документы — Эталон</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root {
-            --primary: #4A9FD9;
-            --primary-dark: #3A87BF;
-            --primary-light: #E6F0F8;
-            --primary-muted: #B3CBE0;
-            --accent: #B8C4DD;
-            --white: #FFFFFF;
-            --bg: #F8F9FC;
-            --card: #FFFFFF;
-            --border: #ECEEF4;
-            --border-hover: #D4D8E8;
-            --text: #1E1E2D;
-            --text-2: #3F4254;
-            --text-muted: #A1A5B7;
-            --green: #22AD5C;
-            --green-bg: #EEFBF3;
-            --red: #E44258;
-            --red-bg: #FEF0F2;
-            --yellow: #F5A623;
-            --yellow-bg: #FFF8EC;
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-            --shadow: 0 1px 4px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.02);
-            --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
-            --shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
-            --radius: 16px;
-            --radius-sm: 10px;
-            --radius-xs: 6px;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Geologica', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            font-size: 14px;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
+        /* ===== PAGE-SPECIFIC: Dashboard ===== */
 
-        /* ===== AUTH ===== */
-        .auth-screen {
-            display: flex; align-items: center; justify-content: center;
-            min-height: 100vh; background: var(--bg);
-        }
-        .auth-card {
-            background: var(--white); border-radius: 24px; padding: 56px 44px;
-            box-shadow: var(--shadow-lg); text-align: center; width: 100%; max-width: 400px;
-            border: 1px solid var(--border);
-        }
-        .auth-card img { height: 44px; margin-bottom: 32px; }
-        .auth-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
-        .auth-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; }
-        .auth-card input {
-            width: 100%; padding: 14px 18px; border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm); font-size: 16px; outline: none;
-            transition: all 0.2s; background: var(--bg);
-        }
-        .auth-card input:focus { border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 3px var(--primary-light); }
-        .auth-btn {
-            width: 100%; margin-top: 20px; padding: 14px; background: var(--primary);
-            color: white; border: none; border-radius: var(--radius-sm); font-size: 15px;
-            font-weight: 600; cursor: pointer; transition: all 0.2s;
-        }
-        .auth-btn:hover { background: var(--primary-dark); box-shadow: 0 4px 12px rgba(74,159,217,0.3); transform: translateY(-1px); }
-        .auth-error { color: var(--red); font-size: 13px; margin-top: 14px; display: none; }
-
-        /* ===== HEADER (identical to generator.html) ===== */
-        .header {
-            background: var(--white); border-bottom: 1px solid var(--border);
-            padding: 0 28px; display: flex; align-items: center; height: 60px;
-            position: -webkit-sticky; position: sticky; top: 0; z-index: 100;
-        }
-        .header-logo { height: 28px; flex-shrink: 0; }
-        .header-nav { display: flex; gap: 4px; margin-left: 24px; flex-shrink: 0; }
-        .header-nav a {
-            padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 500;
-            color: var(--text-2); text-decoration: none; transition: all 0.2s; white-space: nowrap;
-        }
-        .header-nav a:hover { background: var(--primary-light); color: var(--primary); }
-        .header-nav a.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(74,144,217,0.25); }
-        .header-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .header-btn {
-            padding: 8px 16px; border-radius: 999px; border: 1.5px solid var(--border);
-            background: var(--white); cursor: pointer; font-size: 13px; font-weight: 500;
-            color: var(--text-2); transition: all 0.2s; display: flex; align-items: center; gap: 6px;
-        }
-        .header-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-        .header-btn.logout { color: var(--text-muted); }
-        .header-btn.logout:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
-
-        /* ===== LAYOUT ===== */
         .container { max-width: 900px; margin: 0 auto; padding: 32px 32px 100px; }
 
-        /* ===== SUMMARY ===== */
+        /* ===== SUMMARY TOOLBAR ===== */
         .summary-bar {
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 24px; padding: 20px 24px;
+            margin-bottom: 24px; padding: 14px 20px;
             background: var(--white); border-radius: var(--radius); border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-xs);
         }
-        .summary-text { font-size: 14px; color: var(--text-muted); }
-        .summary-text b { color: var(--text); font-weight: 600; }
-        .summary-text .warn { color: var(--red); font-weight: 600; }
+        .summary-pills { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
-        /* ===== BUTTONS ===== */
-        .btn-primary {
-            padding: 11px 24px; background: var(--primary); color: white; border: none;
-            border-radius: 50px; font-size: 14px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s; letter-spacing: -0.01em;
-        }
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(74,159,217,0.35); }
-        .btn-ghost {
-            padding: 8px 16px; background: none; border: none; color: var(--text-muted);
-            font-size: 14px; cursor: pointer; border-radius: 50px; transition: all 0.2s; font-weight: 500;
-        }
-        .btn-ghost:hover { background: var(--primary-light); color: var(--primary); }
-        .btn-danger {
-            padding: 10px 20px; background: var(--red); color: white; border: none;
-            border-radius: 50px; font-size: 14px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .btn-danger:hover { background: #C9354A; transform: translateY(-1px); }
-        .btn-outline {
-            padding: 9px 20px; background: none; color: var(--primary); border: 1.5px solid var(--primary);
-            border-radius: 50px; font-size: 13px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .btn-outline:hover { background: var(--primary-light); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(74,159,217,0.15); }
-
-        /* ===== CLIENT CARD ===== */
+        /* ===== CLIENT CARD (Accordion pattern) ===== */
         .client-card {
             background: var(--card); border-radius: var(--radius); border: 1.5px solid var(--border);
-            margin-bottom: 16px; box-shadow: var(--shadow); transition: all 0.25s; overflow: visible;
+            margin-bottom: 12px; box-shadow: var(--shadow-sm); transition: all 0.25s; overflow: visible;
             position: relative;
         }
-        .client-card:hover { box-shadow: var(--shadow-md); border-color: var(--border-hover); }
+        .client-card:hover { box-shadow: var(--shadow); border-color: var(--border-hover); }
         .client-header {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 18px 24px; cursor: pointer; user-select: none; transition: background 0.2s;
-            border-radius: var(--radius);
+            padding: 16px 20px; cursor: pointer; user-select: none; transition: background 0.2s;
         }
-        .client-card.open .client-header { border-radius: var(--radius) var(--radius) 0 0; }
-        .client-header:hover { background: var(--primary-light); }
-        .client-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
-        .client-expand {
-            font-size: 10px; color: var(--text-muted); transition: transform 0.25s ease; flex-shrink: 0;
-            width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
-            border-radius: 6px;
+        .client-header:hover { background: var(--primary-10); }
+        .client-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .client-card.open .client-header .accordion-toggle svg {
+            transform: rotate(45deg);
+            color: var(--primary);
         }
-        .client-card.open .client-expand { transform: rotate(90deg); color: var(--primary); }
-        .client-name { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+        .client-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
         .badge {
             font-size: 11px; padding: 3px 10px; border-radius: 50px; font-weight: 600; flex-shrink: 0;
             letter-spacing: -0.01em;
@@ -175,26 +57,43 @@
             background: none; cursor: pointer; font-size: 18px; color: var(--text-muted);
             display: flex; align-items: center; justify-content: center; transition: all 0.2s;
         }
-        .menu-btn:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary-light); }
+        .menu-btn:hover { background: var(--primary-10); color: var(--primary); border-color: var(--primary-10); }
+
+        /* Dropdown with stagger animation */
         .dropdown {
             display: none; position: absolute; top: calc(100% + 4px); right: 0; background: var(--white);
             border: 1.5px solid var(--border); border-radius: var(--radius-sm);
             box-shadow: var(--shadow-lg); min-width: 200px; z-index: 50; overflow: hidden; padding: 4px;
         }
-        .dropdown.open { display: block; }
+        .dropdown.open {
+            display: block;
+            animation: dropdownOpen 0.2s ease forwards;
+        }
+        .dropdown.open button {
+            animation: dropdownItemIn 0.2s ease forwards;
+            opacity: 0;
+        }
+        .dropdown.open button:nth-child(1) { animation-delay: 30ms; }
+        .dropdown.open button:nth-child(2) { animation-delay: 80ms; }
+        .dropdown.open button:nth-child(3) { animation-delay: 130ms; }
         .dropdown button {
             display: block; width: 100%; padding: 10px 14px; text-align: left; border: none;
             background: none; font-size: 14px; cursor: pointer; color: var(--text-2);
             transition: all 0.15s; border-radius: var(--radius-xs); font-weight: 500;
+            font-family: inherit;
         }
-        .dropdown button:hover { background: var(--primary-light); color: var(--primary); }
+        .dropdown button:hover { background: var(--primary-10); color: var(--primary); }
 
-        /* ===== CLIENT BODY ===== */
+        /* ===== CLIENT BODY (animated accordion) ===== */
         .client-body {
-            display: none; border-top: 1.5px solid var(--border);
-            border-radius: 0 0 var(--radius) var(--radius); overflow: hidden;
+            max-height: 0; overflow: hidden;
+            border-top: 0px solid transparent;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-top 0.2s;
         }
-        .client-card.open .client-body { display: block; }
+        .client-card.open .client-body {
+            max-height: 5000px;
+            border-top: 1.5px solid var(--border);
+        }
         .client-section { padding: 20px 24px; }
         .client-section + .client-section { border-top: 1px solid var(--border); }
         .section-header {
@@ -203,36 +102,44 @@
         }
         .section-title {
             font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-            color: var(--text-muted);
+            color: var(--text-muted); display: flex; align-items: center; gap: 8px;
         }
         .section-add-btn {
             font-size: 13px; color: var(--primary); background: none; border: none;
             cursor: pointer; font-weight: 600; padding: 5px 12px; border-radius: 50px;
-            transition: all 0.2s;
+            transition: all 0.2s; font-family: inherit;
         }
-        .section-add-btn:hover { background: var(--primary-light); }
+        .section-add-btn:hover { background: var(--primary-10); }
 
-        /* ===== DOCUMENT TREE ===== */
-        .doc-group { margin-bottom: 10px; }
-        .doc-group:last-child { margin-bottom: 0; }
-        .doc-card {
-            border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
-            transition: all 0.2s;
+        /* ===== DOCUMENT TREE (File Tree Explorer pattern) ===== */
+        .tree-container {
+            border: 1px solid var(--border); border-radius: var(--radius-sm);
+            overflow: hidden; background: var(--white);
         }
-        .doc-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-sm); }
-        .doc-card.border-red { border-left: 3px solid var(--red); }
-        .doc-card.border-green { border-left: 3px solid var(--green); }
+        .tree-titlebar {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 14px; background: var(--bg); border-bottom: 1px solid var(--border);
+            font-size: 12px; color: var(--text-muted); font-weight: 500;
+        }
+        .tree-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .tree-dot-red { background: #FF605C; }
+        .tree-dot-yellow { background: #FFBD44; }
+        .tree-dot-green { background: #00CA4E; }
+        .tree-titlebar-text { margin-left: 4px; }
+
+        .doc-group { margin-bottom: 0; }
+        .doc-group:last-child .doc-row:last-child { border-bottom: none; }
+
         .doc-row {
-            display: flex; align-items: center; padding: 12px 16px; gap: 10px;
-            transition: background 0.15s;
+            display: flex; align-items: center; padding: 10px 16px; gap: 10px;
+            transition: background 0.15s; border-bottom: 1px solid var(--border);
+            position: relative;
         }
         .doc-row:hover { background: var(--bg); }
-        .doc-children { border-top: 1px solid var(--border); background: var(--bg); }
-        .doc-children .doc-row { padding-left: 40px; position: relative; }
-        .doc-children .doc-row::before {
-            content: ''; position: absolute; left: 26px; top: 50%; width: 8px; height: 1px;
-            background: var(--border-hover);
-        }
+
+        /* Tree connector lines */
+        .doc-children { background: var(--bg); }
+        .doc-children .doc-row { padding-left: 44px; }
         .doc-child-wrap { position: relative; }
         .doc-child-wrap::before {
             content: ''; position: absolute; left: 26px; top: 0; bottom: 50%; width: 1px;
@@ -242,13 +149,30 @@
             content: ''; position: absolute; left: 26px; top: 50%; bottom: 0; width: 1px;
             background: var(--border-hover);
         }
-        .doc-children .doc-children {
-            background: var(--white); border-top: 1px dashed var(--border); margin-left: 22px;
+        .doc-children .doc-row::before {
+            content: ''; position: absolute; left: 26px; top: 50%; width: 10px; height: 1px;
+            background: var(--border-hover);
         }
-        .doc-children .doc-children .doc-row { padding-left: 34px; }
-        .doc-children .doc-children .doc-row::before { left: 20px; }
+        .doc-children .doc-children {
+            background: var(--white);
+        }
+        .doc-children .doc-children .doc-row { padding-left: 66px; }
+        .doc-children .doc-children .doc-row::before { left: 48px; }
         .doc-children .doc-children .doc-child-wrap::before,
-        .doc-children .doc-children .doc-child-wrap::after { left: 20px; }
+        .doc-children .doc-children .doc-child-wrap::after { left: 48px; }
+
+        /* Document type icon */
+        .doc-type-icon {
+            width: 22px; height: 22px;
+            border-radius: 5px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .doc-type-icon svg { width: 12px; height: 12px; }
+        .doc-type-icon.contract { background: var(--primary-10); color: var(--primary); }
+        .doc-type-icon.amendment { background: var(--orange-bg); color: var(--orange); }
+        .doc-type-icon.act { background: var(--green-bg); color: var(--green); }
+
         .doc-type {
             font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;
             padding: 4px 8px; border-radius: 5px; flex-shrink: 0; line-height: 1;
@@ -259,17 +183,18 @@
         .doc-desc {
             flex: 1; font-size: 14px; font-weight: 500; min-width: 0;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-2);
+            letter-spacing: -0.01em;
         }
         .doc-date { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
         .doc-status {
             cursor: pointer; display: flex; align-items: center; gap: 6px;
             font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 50px;
             border: none; background: none; transition: all 0.2s; user-select: none;
-            width: 130px; justify-content: center; flex-shrink: 0;
+            width: 130px; justify-content: center; flex-shrink: 0; font-family: inherit;
         }
         .doc-status.signed { color: var(--green); background: var(--green-bg); }
         .doc-status.unsigned { color: var(--red); background: var(--red-bg); }
-        .doc-status:hover { transform: scale(1.06); box-shadow: var(--shadow-sm); }
+        .doc-status:hover { transform: scale(1.04); box-shadow: var(--shadow-xs); }
         .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
         .signed .status-dot { background: var(--green); }
         .unsigned .status-dot { background: var(--red); }
@@ -281,7 +206,7 @@
             display: flex; align-items: center; gap: 5px;
             width: 90px; justify-content: center;
         }
-        .doc-storage:hover { transform: scale(1.06); box-shadow: var(--shadow-sm); }
+        .doc-storage:hover { transform: scale(1.04); box-shadow: var(--shadow-xs); }
         .storage-edo { color: var(--green); background: var(--green-bg); border-color: var(--green-bg); }
         .storage-edo:hover { background: #D9F5E5; }
         .storage-paper { color: var(--text-muted); }
@@ -293,21 +218,21 @@
             border-radius: 50%; font-size: 13px; color: var(--text-muted);
             display: flex; align-items: center; justify-content: center; transition: all 0.2s;
         }
-        .small-btn:hover { background: var(--primary-light); color: var(--primary); transform: scale(1.15); }
+        .small-btn:hover { background: var(--primary-10); color: var(--primary); transform: scale(1.1); }
         .small-btn.del:hover { background: var(--red-bg); color: var(--red); }
 
         /* ===== TASKS ===== */
-        .task-list { display: flex; flex-direction: column; gap: 8px; }
+        .task-list { display: flex; flex-direction: column; gap: 6px; }
         .task-item {
             display: flex; align-items: center; gap: 10px; padding: 10px 14px;
             border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--white);
             transition: all 0.2s;
         }
-        .task-item:hover { border-color: var(--border-hover); box-shadow: var(--shadow); }
+        .task-item:hover { border-color: var(--border-hover); box-shadow: var(--shadow-sm); }
         .task-item.pinned { border-color: var(--yellow); background: var(--yellow-bg); }
         .task-pin {
             width: 26px; height: 26px; border: none; background: none; cursor: pointer;
-            font-size: 14px; flex-shrink: 0; border-radius: 50%;
+            flex-shrink: 0; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             color: var(--text-muted); opacity: 0.35; transition: all 0.2s;
         }
@@ -322,9 +247,10 @@
         .task-due.overdue { color: var(--red); font-weight: 600; }
         .task-status-btn {
             font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 50px;
-            border: none; cursor: pointer; flex-shrink: 0; transition: all 0.2s; letter-spacing: -0.01em;
+            border: none; cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+            letter-spacing: -0.01em; font-family: inherit;
         }
-        .task-status-btn:hover { transform: scale(1.06); box-shadow: var(--shadow-sm); }
+        .task-status-btn:hover { transform: scale(1.04); box-shadow: var(--shadow-xs); }
         .task-status-todo { background: var(--primary-light); color: var(--primary); }
         .task-status-in_progress { background: var(--yellow-bg); color: var(--yellow); }
         .task-status-done { background: var(--green-bg); color: var(--green); }
@@ -335,7 +261,6 @@
         .client-notes {
             font-size: 13px; color: var(--text-muted); padding: 14px 24px;
             border-top: 1px solid var(--border); background: var(--bg);
-            border-radius: 0 0 var(--radius) var(--radius);
         }
         .client-notes b { color: var(--text-2); font-weight: 600; }
 
@@ -344,96 +269,31 @@
             display: flex; align-items: center; gap: 16px; margin: 40px 0 20px;
             cursor: pointer; user-select: none;
         }
-        .archive-divider:hover .archive-label { color: var(--text-2); }
+        .archive-divider:hover .archive-label { color: var(--text-2); border-color: var(--border-hover); }
         .archive-line { flex: 1; height: 1px; background: var(--border); }
         .archive-label {
             font-size: 13px; font-weight: 600; color: var(--text-muted);
-            display: flex; align-items: center; gap: 8px; transition: color 0.2s;
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
             padding: 6px 14px; border-radius: 50px; background: var(--white);
             border: 1px solid var(--border);
         }
-        .archive-divider:hover .archive-label { border-color: var(--border-hover); }
-        .archive-arrow { font-size: 10px; transition: transform 0.25s ease; }
+        .archive-arrow {
+            transition: transform 0.3s ease;
+            display: flex; align-items: center;
+        }
         .archive-section { display: none; }
         .archive-section.open { display: block; }
         .archive-card { opacity: 0.6; transition: all 0.2s; }
         .archive-card:hover { opacity: 1; }
 
-        /* ===== MODAL ===== */
-        .modal-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(30,30,45,0.25);
-            z-index: 200; align-items: center; justify-content: center;
-            backdrop-filter: blur(4px); overflow-y: auto; padding: 16px;
-        }
-        .modal-overlay.open { display: flex; }
-        .modal {
-            background: var(--white); border-radius: 20px; padding: 32px 36px;
-            width: 100%; max-width: 460px; box-shadow: 0 24px 80px rgba(0,0,0,0.12);
-            border: 1px solid var(--border); flex-shrink: 0;
-        }
-        .modal h3 { font-size: 20px; font-weight: 700; margin-bottom: 24px; letter-spacing: -0.02em; }
-        .form-group { margin-bottom: 18px; }
-        .form-group label {
-            display: block; font-size: 13px; font-weight: 600;
-            color: var(--text-muted); margin-bottom: 8px; letter-spacing: 0.01em;
-        }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%; padding: 12px 16px; border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm); font-size: 16px; font-family: inherit;
-            outline: none; transition: all 0.2s; background: var(--bg);
-        }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-            border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 3px var(--primary-light);
-        }
-        .form-group textarea { resize: vertical; min-height: 80px; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 28px; }
-
-        /* ===== CONFIRM ===== */
-        .confirm-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(30,30,45,0.3);
-            z-index: 250; align-items: center; justify-content: center;
-        }
-        .confirm-overlay.open { display: flex; }
-        .confirm-box {
-            background: var(--white); border-radius: 20px; padding: 32px 36px;
-            max-width: 400px; width: 100%; box-shadow: 0 24px 80px rgba(0,0,0,0.12); text-align: center;
-        }
-        .confirm-box p { font-size: 16px; margin-bottom: 24px; line-height: 1.5; font-weight: 500; color: var(--text-2); }
-        .confirm-actions { display: flex; gap: 10px; justify-content: center; }
-
-        /* ===== EMPTY ===== */
-        .empty { text-align: center; padding: 56px 24px; color: var(--text-muted); }
-        .empty-icon { font-size: 44px; margin-bottom: 16px; opacity: 0.25; }
-        .empty h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--text-2); }
-        .empty p { font-size: 14px; }
-
-        /* ===== TOAST ===== */
-        .toast {
-            position: fixed; bottom: 28px; right: 28px; background: var(--text);
-            color: var(--white); padding: 14px 24px; border-radius: 50px;
-            font-size: 14px; font-weight: 500; z-index: 300; opacity: 0; transform: translateY(12px);
-            transition: all 0.35s ease; pointer-events: none; box-shadow: var(--shadow-lg);
-        }
-        .toast.show { opacity: 1; transform: translateY(0); }
-
-
         /* ===== RESPONSIVE ===== */
-
-        /* Tablet */
         @media (max-width: 768px) {
-            .header { padding: 0 12px; height: 52px; }
-            .header-logo { height: 24px; }
-            .header-nav { margin-left: 8px; gap: 2px; }
-            .header-nav a { padding: 6px 12px; font-size: 12px; }
-            .header-actions { gap: 4px; }
-            .header-btn span { display: none; }
-            .header-btn { padding: 8px; width: 36px; height: 36px; justify-content: center; border-radius: 999px; }
-            .header-btn.logout { width: auto; padding: 6px 14px; font-size: 12px; }
             .container { padding: 16px 12px 80px; }
             .summary-bar {
                 flex-direction: column; gap: 12px; align-items: stretch;
-                padding: 16px 18px;
+                padding: 14px 16px;
             }
+            .summary-pills { gap: 6px; }
             .btn-primary { width: 100%; justify-content: center; text-align: center; }
             .client-card { border-radius: 12px; }
             .client-header { padding: 14px 16px; }
@@ -441,34 +301,22 @@
             .client-name { font-size: 14px; }
             .badge { font-size: 10px; padding: 2px 8px; }
             .client-section { padding: 14px 16px; }
-            .modal { margin: 12px; padding: 24px 20px; border-radius: 14px; }
-            .modal h3 { font-size: 18px; }
-            .auth-card { padding: 40px 28px; margin: 16px; }
+            .tree-titlebar { display: none; }
         }
 
-        /* Mobile */
         @media (max-width: 480px) {
-            /* header inherits from 768px breakpoint — same as generator */
             .container { padding: 12px 8px 80px; }
-            .summary-bar { padding: 14px 14px; border-radius: 12px; }
-            .summary-text { font-size: 13px; }
+            .summary-bar { padding: 12px 12px; border-radius: 12px; }
             .btn-primary { padding: 12px 20px; font-size: 14px; border-radius: 999px; }
-
-            /* Client cards */
             .client-card { margin-bottom: 10px; border-radius: 12px; }
             .client-header { padding: 12px 14px; }
             .client-left { gap: 6px; }
-            .client-expand { width: 16px; font-size: 9px; }
             .client-name { font-size: 14px; max-width: 140px; }
             .badge { font-size: 9px; padding: 2px 6px; }
-            .menu-btn { width: 30px; height: 30px; font-size: 16px; }
-
-            /* Documents */
+            .menu-btn { width: 30px; height: 30px; }
             .client-section { padding: 12px 14px; }
             .section-title { font-size: 10px; }
             .section-add-btn { font-size: 12px; }
-            .doc-group { margin-bottom: 8px; }
-            .doc-card { border-radius: 8px; }
             .doc-row { padding: 10px 12px; gap: 6px; }
             .doc-type { font-size: 9px; padding: 3px 6px; }
             .doc-desc { font-size: 13px; }
@@ -482,52 +330,18 @@
             .doc-children .doc-row::before { left: 16px; }
             .doc-child-wrap::before,
             .doc-child-wrap:not(:last-child)::after { left: 16px; }
-
-            /* Tasks */
             .task-item { padding: 10px 12px; gap: 6px; border-radius: 8px; }
-            .task-pin { width: 28px; height: 28px; font-size: 14px; }
+            .task-pin { width: 28px; height: 28px; }
             .task-title { font-size: 13px; }
             .task-status-btn { font-size: 10px; padding: 3px 8px; }
             .task-due { font-size: 10px; }
             .task-actions { opacity: 1; }
-            .task-actions .small-btn { width: 32px; height: 32px; font-size: 16px; }
-
-            /* Notes */
+            .task-actions .small-btn { width: 32px; height: 32px; }
             .client-notes { padding: 10px 14px; font-size: 12px; }
-
-            /* Archive */
             .archive-divider { margin: 28px 0 14px; }
             .archive-label { font-size: 12px; padding: 5px 12px; }
-
-            /* Modal */
-            .modal-overlay { padding: 20px 10px; }
-            .modal { padding: 22px 18px; border-radius: 14px; }
-            .modal h3 { font-size: 17px; margin-bottom: 18px; }
-            .form-group { margin-bottom: 14px; }
-            .form-group label { font-size: 12px; }
-            .form-group input, .form-group textarea, .form-group select {
-                padding: 11px 14px; font-size: 16px;
-            }
-            .modal-actions { margin-top: 20px; }
-            .btn-ghost { padding: 10px 16px; }
-
-            /* Auth */
-            .auth-card { padding: 36px 24px; border-radius: 16px; }
-            .auth-card img { height: 36px; margin-bottom: 24px; }
-            .auth-card h2 { font-size: 20px; }
-            .auth-card input { padding: 13px 16px; }
-            .auth-btn { padding: 13px; }
-
-            /* Confirm */
-            .confirm-box { padding: 24px 20px; border-radius: 14px; }
-            .confirm-box p { font-size: 14px; }
-
-            /* Dropdown */
             .dropdown { min-width: 160px; }
             .dropdown button { padding: 10px 12px; font-size: 13px; }
-
-            /* Toast */
-            .toast { bottom: 16px; right: 16px; left: 16px; text-align: center; font-size: 13px; }
         }
     </style>
 </head>
@@ -535,7 +349,7 @@
 
 <div id="authScreen" class="auth-screen" style="display:none">
     <div class="auth-card">
-        <img src="logo.png" alt="Эталон">
+        <img src="logo.png" alt="Эталон" class="auth-logo">
         <h2>Документы</h2>
         <p id="authSubtitle">Войдите в аккаунт</p>
         <form onsubmit="event.preventDefault();handleAuthSubmit()">
@@ -561,7 +375,7 @@
         </nav>
         <div class="header-actions">
             <button class="header-btn" onclick="exportToCSV()" title="Экспорт в Google Таблицы (CSV)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                <i data-lucide="file-spreadsheet" style="width:16px;height:16px;stroke-width:2"></i>
                 <span>Экспорт</span>
             </button>
             <button class="header-btn logout" onclick="logout()" title="Выйти из системы">Выйти</button>
@@ -570,7 +384,7 @@
 
     <div class="container">
         <div class="summary-bar">
-            <div class="summary-text" id="summary"></div>
+            <div class="summary-pills" id="summary"></div>
             <button class="btn-primary" onclick="openClientModal()">+ Новый клиент</button>
         </div>
         <div id="clientsList"></div>
@@ -580,7 +394,7 @@
         <div class="archive-divider" onclick="toggleArchive()">
             <span class="archive-line"></span>
             <span class="archive-label">
-                <span class="archive-arrow" id="archiveArrow">&#9654;</span>
+                <span class="archive-arrow" id="archiveArrow"><i data-lucide="chevron-right" style="width:14px;height:14px;stroke-width:2.5"></i></span>
                 Архив <span id="archiveCount"></span>
             </span>
             <span class="archive-line"></span>
@@ -639,7 +453,6 @@ async function loadFromFirestore() {
             const d = doc.data();
             data.clients = d.clients || [];
             data.tasks = d.tasks || [];
-            // Seed if empty
             if (data.clients.length === 0) {
                 const seed = getSeedData();
                 data.clients = seed.clients;
@@ -673,7 +486,7 @@ function pl(n, o, f, m) {
 }
 
 /* ===== AUTH ===== */
-let authMode = 'login'; // 'login' | 'register' | 'reset'
+let authMode = 'login';
 
 function showAuthError(msg) {
     const el = document.getElementById('authError');
@@ -797,10 +610,12 @@ function toggleExpand(id) {
     expanded.has(id) ? expanded.delete(id) : expanded.add(id);
     render();
 }
+
 function toggleArchive() {
     archiveOpen = !archiveOpen;
     document.getElementById('archiveSection').classList.toggle('open', archiveOpen);
-    document.getElementById('archiveArrow').style.transform = archiveOpen ? 'rotate(90deg)' : '';
+    const arrow = document.getElementById('archiveArrow');
+    arrow.style.transform = archiveOpen ? 'rotate(90deg)' : '';
 }
 
 /* ===== RENDER ===== */
@@ -811,10 +626,10 @@ function render() {
     const totalDocs = active.reduce((s, c) => s + c.documents.length, 0);
     const activeTasks = data.tasks.filter(t => t.column !== 'done').length;
 
-    let sum = `<b>${active.length}</b> ${pl(active.length,'клиент','клиента','клиентов')}`;
-    if (totalDocs > 0) sum += ` · <span class="warn">${unsigned}</span> неподписан. док.`;
-    if (activeTasks > 0) sum += ` · ${activeTasks} ${pl(activeTasks,'задача','задачи','задач')}`;
-    document.getElementById('summary').innerHTML = sum;
+    let pills = `<span class="stat-pill"><b>${active.length}</b> ${pl(active.length,'клиент','клиента','клиентов')}</span>`;
+    if (totalDocs > 0 && unsigned > 0) pills += `<span class="stat-pill warn"><b>${unsigned}</b> неподписан.</span>`;
+    if (activeTasks > 0) pills += `<span class="stat-pill tasks"><b>${activeTasks}</b> ${pl(activeTasks,'задача','задачи','задач')}</span>`;
+    document.getElementById('summary').innerHTML = pills;
 
     const cl = document.getElementById('clientsList');
     if (active.length === 0) {
@@ -823,7 +638,7 @@ function render() {
         cl.innerHTML = active.map(c => renderCard(c, false)).join('');
     }
 
-    // Unlinked tasks (no client)
+    // Unlinked tasks
     const unlinked = data.tasks.filter(t => !t.clientId);
     const utEl = document.getElementById('unlinkedTasks');
     if (unlinked.length > 0) {
@@ -834,10 +649,13 @@ function render() {
         });
         const sorted = [...pinned, ...unpinned];
         utEl.innerHTML = `<div class="client-card open" style="border-color:var(--primary-light)">
-            <div class="client-body" style="display:block;border-top:none">
+            <div class="client-body" style="max-height:5000px;border-top:1.5px solid var(--border)">
                 <div class="client-section">
                     <div class="section-header">
-                        <span class="section-title">Общие задачи</span>
+                        <span class="section-title">
+                            <span class="icon-badge icon-badge-blue"><i data-lucide="list-checks" style="width:14px;height:14px;stroke-width:2"></i></span>
+                            Общие задачи
+                        </span>
                         <button class="section-add-btn" onclick="openTaskModal(null)">+ Добавить</button>
                     </div>
                     <div class="task-list">${sorted.map(t => renderTask(t)).join('')}</div>
@@ -855,12 +673,19 @@ function render() {
     } else {
         as.innerHTML = archived.map(c => renderCard(c, true)).join('');
     }
+
+    lucide.createIcons();
 }
 
 function renderCard(c, isArch) {
     const isOpen = expanded.has(c.id);
     const unsigned = c.documents.filter(d => !d.signed).length;
     const tasks = data.tasks.filter(t => t.clientId === c.id && t.column !== 'done');
+
+    // Determine icon badge color
+    let badgeClass = 'icon-badge-blue';
+    if (unsigned > 0) badgeClass = 'icon-badge-red';
+    else if (c.documents.length > 0 && unsigned === 0) badgeClass = 'icon-badge-green';
 
     let badges = '';
     if (c.documents.length > 0) badges += `<span class="badge badge-docs">${c.documents.length} док</span>`;
@@ -872,10 +697,12 @@ function renderCard(c, isArch) {
     const menu = isArch
         ? `<button class="btn-outline" onclick="event.stopPropagation();restoreClient('${c.id}')">Восстановить</button>`
         : `<div class="client-menu-wrap">
-            <button class="menu-btn" onclick="event.stopPropagation();toggleDD(this)" title="Меню">&#8942;</button>
+            <button class="menu-btn" onclick="event.stopPropagation();toggleDD(this)" title="Меню">
+                <i data-lucide="ellipsis-vertical" style="width:16px;height:16px;stroke-width:2"></i>
+            </button>
             <div class="dropdown">
-                <button onclick="openClientModal('${c.id}')">Редактировать</button>
-                <button onclick="archiveClient('${c.id}')">В архив</button>
+                <button onclick="openClientModal('${c.id}')"><i data-lucide="pencil" style="width:14px;height:14px;stroke-width:2;margin-right:8px;vertical-align:-2px"></i>Редактировать</button>
+                <button onclick="archiveClient('${c.id}')"><i data-lucide="archive" style="width:14px;height:14px;stroke-width:2;margin-right:8px;vertical-align:-2px"></i>В архив</button>
             </div>
         </div>`;
 
@@ -883,7 +710,7 @@ function renderCard(c, isArch) {
     const { roots, childrenOf } = buildTree(c.documents);
     const docsHtml = roots.map(r => renderDocGroup(c.id, r, childrenOf, isArch)).join('');
 
-    // Tasks for this client
+    // Tasks
     const clientTasks = data.tasks.filter(t => t.clientId === c.id);
     const pinned = clientTasks.filter(t => t.pinned).sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
     const unpinned = clientTasks.filter(t => !t.pinned).sort((a,b) => {
@@ -895,17 +722,36 @@ function renderCard(c, isArch) {
 
     const notesHtml = c.notes ? `<div class="client-notes"><b>Заметки:</b> ${esc(c.notes)}</div>` : '';
 
+    // Tree container for documents
+    const treeContent = docsHtml
+        ? `<div class="tree-container">
+            <div class="tree-titlebar">
+                <span class="tree-dot tree-dot-red"></span>
+                <span class="tree-dot tree-dot-yellow"></span>
+                <span class="tree-dot tree-dot-green"></span>
+                <span class="tree-titlebar-text">документы</span>
+            </div>
+            ${docsHtml}
+        </div>`
+        : '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">Нет документов</div>';
+
     const body = `<div class="client-body">
         <div class="client-section">
             <div class="section-header">
-                <span class="section-title">Документы</span>
+                <span class="section-title">
+                    <span class="icon-badge icon-badge-blue"><i data-lucide="folder-open" style="width:14px;height:14px;stroke-width:2"></i></span>
+                    Документы
+                </span>
                 ${!isArch ? `<button class="section-add-btn" onclick="openDocModal('${c.id}')">+ Добавить</button>` : ''}
             </div>
-            ${docsHtml || '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">Нет документов</div>'}
+            ${treeContent}
         </div>
         <div class="client-section">
             <div class="section-header">
-                <span class="section-title">Задачи</span>
+                <span class="section-title">
+                    <span class="icon-badge icon-badge-orange"><i data-lucide="check-square" style="width:14px;height:14px;stroke-width:2"></i></span>
+                    Задачи
+                </span>
                 ${!isArch ? `<button class="section-add-btn" onclick="openTaskModal('${c.id}')">+ Добавить</button>` : ''}
             </div>
             ${sortedTasks.length > 0 ? `<div class="task-list">${tasksHtml}</div>` : '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">Нет задач</div>'}
@@ -916,7 +762,15 @@ function renderCard(c, isArch) {
     return `<div class="client-card ${isOpen ? 'open' : ''} ${isArch ? 'archive-card' : ''}" data-id="${c.id}">
         <div class="client-header" onclick="toggleExpand('${c.id}')">
             <div class="client-left">
-                <span class="client-expand">&#9654;</span>
+                <span class="accordion-toggle">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <line x1="7" y1="2" x2="7" y2="12"/>
+                        <line x1="2" y1="7" x2="12" y2="7"/>
+                    </svg>
+                </span>
+                <span class="icon-badge ${badgeClass}" style="width:28px;height:28px;border-radius:8px">
+                    <i data-lucide="building-2" style="width:14px;height:14px;stroke-width:2"></i>
+                </span>
                 <span class="client-name">${esc(c.name)}</span>
                 ${archDate}
                 ${badges}
@@ -942,7 +796,6 @@ function buildTree(docs) {
 
 function renderDocGroup(cid, doc, childrenOf, isArch) {
     const ch = childrenOf[doc.id] || [];
-    const border = doc.signed ? 'border-green' : 'border-red';
     let chHtml = '';
     if (ch.length > 0) {
         const items = ch.map(c => {
@@ -955,7 +808,7 @@ function renderDocGroup(cid, doc, childrenOf, isArch) {
         }).join('');
         chHtml = `<div class="doc-children">${items}</div>`;
     }
-    return `<div class="doc-group"><div class="doc-card ${border}">${renderDocRow(cid,doc,isArch)}${chHtml}</div></div>`;
+    return `<div class="doc-group">${renderDocRow(cid,doc,isArch)}${chHtml}</div>`;
 }
 
 function renderDocRow(cid, doc, isArch) {
@@ -963,16 +816,20 @@ function renderDocRow(cid, doc, isArch) {
     const sl = doc.signed ? 'Подписано' : 'Не подписано';
     const storageIcon = doc.storage === 'edo'
         ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke="#22AD5C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="#A1A5B7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="#9598AC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const st = doc.storage === 'edo' ? 'ЭДО' : 'Бумага';
     const tl = { contract:'Договор', amendment:'ДС', act:'Акт' }[doc.type] || '';
     const tc = `doc-type-${doc.type}`;
+    const typeIconClass = doc.type;
+    const typeIcons = { contract: 'file-text', amendment: 'file-pen', act: 'file-check' };
+    const typeIcon = typeIcons[doc.type] || 'file';
     const dt = doc.createdAt ? fmtDate(doc.createdAt) : '';
     const acts = !isArch ? `<div class="doc-actions">
-        <button class="small-btn" onclick="event.stopPropagation();openDocModal('${cid}','${doc.id}')" title="Редактировать">&#9998;</button>
-        <button class="small-btn" onclick="event.stopPropagation();deleteDoc('${cid}','${doc.id}')" title="Удалить" class="del">&times;</button>
+        <button class="small-btn" onclick="event.stopPropagation();openDocModal('${cid}','${doc.id}')" title="Редактировать"><i data-lucide="pencil" style="width:13px;height:13px;stroke-width:2"></i></button>
+        <button class="small-btn del" onclick="event.stopPropagation();deleteDoc('${cid}','${doc.id}')" title="Удалить"><i data-lucide="trash-2" style="width:13px;height:13px;stroke-width:2"></i></button>
     </div>` : '';
     return `<div class="doc-row">
+        <span class="doc-type-icon ${typeIconClass}"><i data-lucide="${typeIcon}" style="width:12px;height:12px;stroke-width:2.5"></i></span>
         <span class="doc-type ${tc}">${tl}</span>
         <span class="doc-desc" title="${esc(doc.description)}">${esc(doc.description)}</span>
         <span class="doc-date">${dt}</span>
@@ -992,13 +849,15 @@ function renderTask(t) {
         due = `<span class="task-due ${over?'overdue':''}">${fmtDate(t.dueDate)}</span>`;
     }
     return `<div class="task-item ${t.pinned ? 'pinned' : ''}">
-        <button class="task-pin" onclick="togglePin('${t.id}')" title="${t.pinned ? 'Открепить' : 'Закрепить'}">&#128204;</button>
+        <button class="task-pin" onclick="togglePin('${t.id}')" title="${t.pinned ? 'Открепить' : 'Закрепить'}">
+            <i data-lucide="pin" style="width:14px;height:14px;stroke-width:2"></i>
+        </button>
         <span class="task-title ${t.column==='done'?'done':''}" title="${esc(t.description||'')}">${esc(t.title)}</span>
         ${due}
         <button class="task-status-btn task-status-${t.column}" onclick="cycleTaskStatus('${t.id}')" title="Нажмите чтобы сменить статус">${sl}</button>
         <div class="task-actions">
-            <button class="small-btn" onclick="openTaskModal(null,'${t.id}')" title="Редактировать">&#9998;</button>
-            <button class="small-btn" onclick="deleteTask('${t.id}')" title="Удалить" class="del">&times;</button>
+            <button class="small-btn" onclick="openTaskModal(null,'${t.id}')" title="Редактировать"><i data-lucide="pencil" style="width:13px;height:13px;stroke-width:2"></i></button>
+            <button class="small-btn del" onclick="deleteTask('${t.id}')" title="Удалить"><i data-lucide="trash-2" style="width:13px;height:13px;stroke-width:2"></i></button>
         </div>
     </div>`;
 }
