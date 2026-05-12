@@ -60,11 +60,14 @@
         }
         .menu-btn:hover { background: var(--primary-10); color: var(--primary); border-color: var(--primary-10); }
 
-        /* Dropdown with stagger animation */
+        /* Dropdown with stagger animation.
+           position: fixed + координаты считаются в JS (positionDropdown) — так выпадашку
+           не клипает overflow родителей и не перекрывают соседние карточки, что бы там ни
+           было со стэкинг-контекстами. z-index ниже модалки (200) и тоста (300). */
         .dropdown {
-            display: none; position: absolute; top: calc(100% + 4px); right: 0; background: var(--white);
+            display: none; position: fixed; background: var(--white);
             border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-            box-shadow: var(--shadow-lg); min-width: 200px; z-index: 50; overflow: hidden; padding: 4px;
+            box-shadow: var(--shadow-lg); min-width: 200px; z-index: 150; overflow: hidden; padding: 4px;
         }
         .dropdown.open {
             display: block;
@@ -1083,25 +1086,54 @@ function deleteTask(tid) {
 }
 
 /* ===== DROPDOWN ===== */
+function _resetDropdown(d) {
+    d.classList.remove('open');
+    d.style.left = ''; d.style.top = ''; d.style.visibility = '';
+    const c = d.closest('.client-card');
+    if (c) c.classList.remove('menu-open');
+}
 function closeAllDropdowns(except) {
     document.querySelectorAll('.dropdown.open').forEach(d => {
         if (d === except) return;
-        d.classList.remove('open');
-        const c = d.closest('.client-card');
-        if (c) c.classList.remove('menu-open');
+        _resetDropdown(d);
     });
+}
+function positionDropdown(btn, dd) {
+    // открываем невидимым чтобы измерить, потом ставим у кнопки и держим в пределах вьюпорта
+    dd.style.visibility = 'hidden';
+    dd.classList.add('open');
+    const b = btn.getBoundingClientRect();
+    const w = dd.offsetWidth || 200;
+    const h = dd.offsetHeight || 80;
+    const pad = 8;
+    let left = b.right - w;                 // правый край выпадашки под правым краем кнопки
+    let top = b.bottom + 4;                 // на 4px ниже кнопки
+    if (left < pad) left = pad;
+    if (left + w > window.innerWidth - pad) left = Math.max(pad, window.innerWidth - pad - w);
+    if (top + h > window.innerHeight - pad) top = b.top - 4 - h;   // не влезает вниз — раскрываем вверх
+    if (top < pad) top = pad;
+    dd.style.left = left + 'px';
+    dd.style.top = top + 'px';
+    dd.style.visibility = '';
 }
 function toggleDD(btn) {
     const dd = btn.nextElementSibling;
-    closeAllDropdowns(dd);
     const willOpen = !dd.classList.contains('open');
-    dd.classList.toggle('open');
-    const card = dd.closest('.client-card');
-    if (card) card.classList.toggle('menu-open', willOpen);
+    closeAllDropdowns(dd);
+    if (willOpen) {
+        positionDropdown(btn, dd);
+        const card = dd.closest('.client-card');
+        if (card) card.classList.add('menu-open');
+    } else {
+        _resetDropdown(dd);
+    }
 }
 document.addEventListener('click', e => {
     if (!e.target.closest('.client-menu-wrap')) closeAllDropdowns();
 });
+// position:fixed выпадашка не едет за страницей — закрываем при скролле/ресайзе
+window.addEventListener('scroll', () => closeAllDropdowns(), true);
+window.addEventListener('resize', () => closeAllDropdowns());
 
 /* ===== EXPORT CSV ===== */
 function exportToCSV() {
