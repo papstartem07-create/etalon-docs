@@ -84,6 +84,9 @@
             font-family: inherit;
         }
         .dropdown button:hover { background: var(--primary-10); color: var(--primary); }
+        /* Карточка с открытым меню поднимается выше соседних — иначе выпадашка прячется под следующей карточкой */
+        .client-card.menu-open { z-index: 30; }
+        .client-card:has(.dropdown.open) { z-index: 30; }
 
         /* ===== CLIENT BODY (animated accordion) ===== */
         .client-body {
@@ -901,7 +904,7 @@ function openClientModal(editId) {
         </div>
         </form>`;
     openModal();
-    setTimeout(() => document.getElementById('fName').focus(), 100);
+    setTimeout(() => document.getElementById('fName')?.focus(), 100);
 }
 
 function saveClient(eid) {
@@ -966,7 +969,7 @@ function openDocModal(cid, did) {
         </div>
         </form>`;
     openModal(); docTypeChanged();
-    setTimeout(() => document.getElementById('fDesc').focus(), 100);
+    setTimeout(() => document.getElementById('fDesc')?.focus(), 100);
 }
 
 function docTypeChanged() {
@@ -1040,7 +1043,7 @@ function openTaskModal(cid, tid) {
         </div>
         </form>`;
     openModal();
-    setTimeout(() => document.getElementById('fTitle').focus(), 100);
+    setTimeout(() => document.getElementById('fTitle')?.focus(), 100);
 }
 
 function saveTask(tid) {
@@ -1080,13 +1083,24 @@ function deleteTask(tid) {
 }
 
 /* ===== DROPDOWN ===== */
+function closeAllDropdowns(except) {
+    document.querySelectorAll('.dropdown.open').forEach(d => {
+        if (d === except) return;
+        d.classList.remove('open');
+        const c = d.closest('.client-card');
+        if (c) c.classList.remove('menu-open');
+    });
+}
 function toggleDD(btn) {
     const dd = btn.nextElementSibling;
-    document.querySelectorAll('.dropdown.open').forEach(d => { if (d !== dd) d.classList.remove('open'); });
+    closeAllDropdowns(dd);
+    const willOpen = !dd.classList.contains('open');
     dd.classList.toggle('open');
+    const card = dd.closest('.client-card');
+    if (card) card.classList.toggle('menu-open', willOpen);
 }
 document.addEventListener('click', e => {
-    if (!e.target.closest('.client-menu-wrap')) document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+    if (!e.target.closest('.client-menu-wrap')) closeAllDropdowns();
 });
 
 /* ===== EXPORT CSV ===== */
